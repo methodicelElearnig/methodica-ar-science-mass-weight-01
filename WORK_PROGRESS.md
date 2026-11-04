@@ -3023,3 +3023,20 @@ Same change as the Hebrew twin: `xapiSelectedLearningType` sends `selected` / le
 confirmed choice and every path switch (no `picks` ledger any more), so the platform sees the path the learner
 ended on. Nothing on a card click, on the already-active tab, or while a resume paints. `20-xapi.js?v=6`.
 Harness: 1143 checks.
+
+## Kata: the Arabic components added to the Hebrew unit (2026-11-04)
+
+`send-metadata.ps1` in parent-unit mode (`-ParentUnitKey methodica-science-mass-weight-01`, ported from
+ar-mass-measure-01 `a840a64`), scoped folder without item 06-002 (it has no screen and is not in Kata for the
+Hebrew unit either). Metadata aligned first with the Hebrew components as Kata holds them: 03 `isRequired`
+false, 04 `relativeDifficulty` 2 (`ec6ac07`).
+
+- Preflight (read-only): parent EXISTS, the six Arabic components absent.
+- Live: 6 components + 25 items `CREATED (HTTP 201)`, 03 → 02 `recommendedAfterFail` linked (200),
+  failed 0. The unit record was only read.
+- Read back (`retrieve-metadata.ps1` raw, before vs after): the unit record and all six Hebrew components
+  unchanged; the unit now holds 12 components. Every Arabic component matches the sent metadata (fields,
+  items, question types, correct answers); launch refs `…/720/ar/science/mass-weight/01/<comp>/index.html`;
+  06 q2 / q3 `true-false` with patterns `["false"]` / `["true"]`; Kata filled the patterns of the choice and
+  matching questions itself.
+- Status: all six **draft** — not yet published (`-Publish` is one-way and freezes the ids).
