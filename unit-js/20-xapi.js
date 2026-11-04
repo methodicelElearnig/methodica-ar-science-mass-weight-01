@@ -305,18 +305,18 @@ function xapiRequestedHint(item, qKey) {
 /* The learning-path choice — MOE v2.7 'selected', category learning-type (2026-11-02, monday.com 28.10.26:
    the choice was never reported). object = the component; result.response = the mediaFormat of the
    chosen path's item, from the part's XAPI_LEARNING_PATHS (agreed deviation from v2.7's contentType,
-   which cannot tell video from reading). Once per distinct path through the 'picks' ledger: re-picking
-   the same path, a resume or a reload stay silent; switching path reports again. Silent while a
-   painter runs, and behind the XAPI_USING_G guard so the ledger never records a statement that never
-   left. Guide: ADDING-REPORTING-AND-RESUME.md §6.3a. */
+   which cannot tell video from reading). EVERY confirmed choice and every path switch reports
+   (2026-11-04, testers: with the old once-per-path 'picks' ledger, video -> text -> video sent two
+   statements and the platform could not tell which path the learner ended on). Only the actions that
+   call this report — Continue on the choice screen and a switch on the path toggle; a card click and a
+   click on the already-active tab do not. Silent while a painter runs (a resume or a reload is not a
+   choice) and behind the XAPI_USING_G guard. Guide: ADDING-REPORTING-AND-RESUME.md §6.3a. */
 function xapiSelectedLearningType(path) {
   var p = (typeof XAPI_LEARNING_PATHS !== 'undefined') && XAPI_LEARNING_PATHS[path];
   if (!p || (typeof resumeIsPainting === 'function' && resumeIsPainting())) return;
   if (!window.XAPI_USING_G || typeof sendStatement720 !== 'function') return;
-  var res = { response: p.mediaFormat }, opts = { category: 'learning-type' };
   try {
-    if (typeof sendStatementOnce === 'function') sendStatementOnce('picks', 'learning-type/' + path, 'selected', 'onlinelesson', res, opts);
-    else sendStatement720('selected', 'onlinelesson', res, opts);
+    sendStatement720('selected', 'onlinelesson', { response: p.mediaFormat }, { category: 'learning-type' });
   } catch (e) { console.error('[xAPI] selected learning-type', e); }
 }
 

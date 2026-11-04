@@ -3016,3 +3016,10 @@ Base: this build came from Hebrew `b8817fd` (2026-10-08). Same change as the Heb
   **Kata: not sent.** ar-mass-measure-01 added its Arabic components to the existing Hebrew unit
   (`a840a64`, `-ParentUnitKey`, KATA binds a learning objective to one unit); that port is part of the Kata step.
 - Harness: 1142 checks; the asset-sweep floor is 120 here (the 18 Hebrew font url()s are gone with Calibri).
+
+## Learning-path choice: `selected` on every choice and switch (2026-11-04)
+
+Same change as the Hebrew twin: `xapiSelectedLearningType` sends `selected` / learning-type on every
+confirmed choice and every path switch (no `picks` ledger any more), so the platform sees the path the learner
+ended on. Nothing on a card click, on the already-active tab, or while a resume paints. `20-xapi.js?v=6`.
+Harness: 1143 checks.

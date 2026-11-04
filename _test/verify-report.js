@@ -704,7 +704,8 @@ if (!JSDOM) {
 
         /* ── The s3 learning-path choice (monday.com 28.10.26, guide §6.3a): 'selected', category
            learning-type, object = the component, response = the chosen path item's catalogue mediaFormat;
-           once per distinct path, on the confirmed choice; silent while a restore paints. ── */
+           EVERY confirmed choice and every path switch (2026-11-04: the once-per-path ledger hid the path the
+           learner ended on); never on a card click or on the already-active tab; silent while a restore paints. ── */
         const paths = JSON.parse(run('JSON.stringify(XAPI_LEARNING_PATHS)'));
         const sub = Object.fromEntries((meta.subContent || []).map((s) => [s.id.replace(/\/$/, '').split('-').pop(), s]));
         ok(c, 'XAPI_LEARNING_PATHS: every path item exists and its mediaFormat equals the catalogue',
@@ -718,9 +719,10 @@ if (!JSDOM) {
           ' _unitState = emptyUnitState();' +
           ' goTo(3); tosSelect(card("text")); tosSelect(card("video")); out.onClick = log.length;' +
           ' tosAdvance(); out.first = log.slice();' +
-          ' goTo(3); tosSelect(card("video")); tosAdvance(); out.repick = log.length;' +
-          ' s4SwitchMode("text"); out.toText = log.slice(1);' +
-          ' s5SwitchMode("video"); out.back = log.length;' +
+          ' goTo(3); tosSelect(card("video")); tosAdvance(); out.repick = log.slice(1);' +
+          ' s4SwitchMode("text"); out.toText = log.slice(2);' +
+          ' s5SwitchMode("video"); out.back = log.slice(3);' +
+          ' s4SwitchMode("video"); out.activeTab = log.length;' +
           ' _unitState = emptyUnitState(); log.length = 0; _restoring = true; goTo(3); tosAdvance(); _restoring = false; out.restoring = log.length;' +
           ' window.sendStatement720 = keepS; _unitState = keepU; goTo(' + OWN[c][OWN[c].length - 1] + '); return JSON.stringify(out); })()'));
         const one = (l, f) => l.length === 1 && l[0].t === 'onlinelesson' && l[0].cat === 'learning-type' && !l[0].obj
@@ -728,10 +730,13 @@ if (!JSDOM) {
         ok(c, 'choice: a card click sends nothing (only the confirmed choice reports)', sel.onClick === 0, JSON.stringify(sel));
         ok(c, 'choice: Continue on video sends one selected — learning-type, component object, response "' + paths.video.mediaFormat + '"',
            one(sel.first, paths.video.mediaFormat), JSON.stringify(sel.first));
-        ok(c, 'choice: re-picking the same path sends nothing', sel.repick === 1, JSON.stringify(sel));
+        ok(c, 'choice: Continue on the same path again sends one more selected (every confirmed choice reports)',
+           one(sel.repick, paths.video.mediaFormat), JSON.stringify(sel.repick));
         ok(c, 'choice: switching to text from the toggle sends one selected, response "' + paths.text.mediaFormat + '"',
            one(sel.toText, paths.text.mediaFormat), JSON.stringify(sel.toText));
-        ok(c, 'choice: switching back to an already-reported path sends nothing', sel.back === 2, JSON.stringify(sel));
+        ok(c, 'choice: switching back to an already-reported path sends one selected again, response "' + paths.video.mediaFormat + '"',
+           one(sel.back, paths.video.mediaFormat), JSON.stringify(sel.back));
+        ok(c, 'choice: a click on the already-active tab sends nothing (no switch, no choice)', sel.activeTab === 4, JSON.stringify(sel));
         ok(c, 'choice: nothing is sent while a restore paints', sel.restoring === 0, JSON.stringify(sel));
       }
 
