@@ -4,7 +4,7 @@
    ול-initResumeLeaveHandlers(), ו-50-loader.js מריץ את השחזור עצמו.
    העיצוב המלא: RESUME.md בלומדת methodica-math-scale-01 (המקור לדפוס הזה).
 
-   methodica-science-mass-weight-01 (2026-09-23): copied from methodica-science-mass-measure-03,
+   methodica-ar-science-mass-weight-01 (2026-09-23): copied from methodica-science-mass-measure-03,
    with: this unit's RESULT_KEYS and NAV_EDGE_KEY; UI_CHARACTER_KEY namespaced per unit (QA D-6 —
    this unit has no character choice today, the key is namespaced so it can never collide);
    `hints` / `picks` ledgers in the document and sendStatementOnce (QA D-7, ported from
@@ -94,6 +94,15 @@ var _leavingToNextPart = false;
    מפילה statement אמיתי בשקט. */
 var _unitState = null;
 
+/* True when the LAST read of the document failed for a reason other than "nothing
+   saved yet" (401, 5xx, network, no registration). Until 2026-11-03 such a read was
+   indistinguishable from a 404 and became a fresh document — whose first save then
+   overwrote the learner's real one on Kata. While this is set, persistUnitState
+   refuses to write and _resumeReady stays off (50-loader.js retries the read once in
+   stage B before giving up). Statements are not affected.
+   (BOOT-AND-RESUME-HARDENING-2026-11-03.md, A3/A4.) */
+var _resumeReadFailed = false;
+
 /* נדלק ע"י initResumeResetHatch. הדגל נחוץ כי ה-hatch מסלק את ?resetState
    מה-URL בתחילת ה-boot, בעוד readUnitState רץ מאוחר יותר (אחרי טעינת
    הספרייה) — ואז הבדיקה על ה-query string כבר לא הייתה מוצאת כלום. */
@@ -140,15 +149,15 @@ function emptyUnitState() {
 /* Namespaced per unit (QA D-6): the origin-wide 'lomda_selectedCharacter' was shared by several
    units with incompatible values, and adoptUnitCharacter copied the foreign value into each
    component's Kata document. */
-var UI_CHARACTER_KEY = 'methodica_science_mass_weight_01_selectedCharacter';
+var UI_CHARACTER_KEY = 'methodica_ar_science_mass_weight_01_selectedCharacter';
 /* ⚠️ Exactly the keys this unit's parts write. A key missing here never reaches the document's
    `results`, so its reader falls back to localStorage only — i.e. a second device reads null.
-   lomda_mw01_standardPass: written by part 02 when it ends ('1' = the 4-of-6 practice gate passed),
+   lomda_mw01_ar_standardPass: written by part 02 when it ends ('1' = the 4-of-6 practice gate passed),
    read by part 03 to skip the basic set. It crosses components, which the per-component document
    cannot carry, so part 03 reads it from this browser's localStorage (fail-safe: a learner on
    another device simply sees the basic set). Listed here so ?resetState clears it. */
 var RESULT_KEYS = [
-  'lomda_mw01_standardPass'
+  'lomda_mw01_ar_standardPass'
 ];
 
 /* מיגרציה של צעד אחד בלבד (v4 → v5), מכנית וניתנת לבדיקה ב-jsdom. מסמך
@@ -185,6 +194,20 @@ function readUnitState() {
     }
     doc = (typeof window.loadState720 === 'function') ? window.loadState720(RESUME_STATE_ID) : null;
   } catch (e) { console.error('[resume] read', e); doc = null; }
+  /* A null from loadState720 is "nothing saved yet" ONLY when the library says so.
+     -k records every read in stateLastResult720(): ok is true for 2xx and for 404
+     ('absent'); anything else (401, 5xx, an empty 200, a network error, no
+     registration) is a failed read, and a failed read must not become a fresh
+     document. The XAPI_DISABLED local path reads as ok. */
+  _resumeReadFailed = false;
+  if (doc === null && typeof window.stateLastResult720 === 'function') {
+    var _lr = null;
+    try { _lr = window.stateLastResult720(); } catch (e) {}
+    if (_lr && _lr.op === 'load' && _lr.ok === false) {
+      _resumeReadFailed = true;
+      console.warn('[resume] state read FAILED (not a 404) — writes stay closed until a read succeeds', _lr);
+    }
+  }
   doc = migrateState(doc);
   if (doc && doc.component && doc.component !== currentPartSlug()) {
     console.warn('[resume] document belongs to "' + doc.component + '", not "' + currentPartSlug() + '" — discarded');
@@ -223,6 +246,12 @@ function captureUnitState() {
    מחזיר אם הכתיבה הסינכרונית נחתה — מי שעומד לנווט חייב לדעת. */
 function persistUnitState(doc) {
   var ok = false;
+  /* The one choke point for every write: after a failed read the in-memory document
+     is a placeholder, and writing it would replace the learner's real one. */
+  if (_resumeReadFailed) {
+    console.warn('[resume] persist refused — the state read failed, writes stay closed');
+    return false;
+  }
   try {
     if (typeof window.saveState720Debounced === 'function') window.saveState720Debounced(RESUME_STATE_ID, doc);
     /* !== false ולא בדיקת truthiness: הספרייה מחזירה true/false מפורש בכל
@@ -318,7 +347,15 @@ function setUnitResult(key, val) {
 
 /* נקרא מ-50-loader.js מיד אחרי ש-_resumeReady נדלק, ו**לפני**
    applyUnitProfile. הסדר הוא מה שמממש את כלל הקדימות: בחירה שנעשתה בסשן
-   הזה חדשה יותר ממה שכתוב במסמך, ולכן היא מנצחת אותו. */
+   הזה חדשה יותר ממה שכתוב במסמך, ולכן היא מנצחת אותו.
+
+   ⚠️ Persists the document AS READ — never captureUnitState(). Until 2026-11-03 this
+   persisted a live capture, and because the loader drains BEFORE applyExecutionState
+   the capture was of the un-restored page: it replaced the saved payload on Kata, both
+   in the synchronous PUT and in the debounced one (which holds the document by
+   reference). Reproduced by Kata on mass-measure-01, 03.11.26. The character and the
+   results live beside the payload, so merging them and writing the document unchanged
+   loses nothing. */
 function drainPendingUnitState() {
   if (!_unitState) return;
   var dirty = false;
@@ -337,7 +374,9 @@ function drainPendingUnitState() {
     dirty = true;
   }
   if (dirty) {
-    try { persistUnitState(captureUnitState()); } catch (e) { console.error('[resume] drain', e); }
+    _unitState.v = RESUME_STATE_VERSION;
+    _unitState.component = currentPartSlug();
+    try { persistUnitState(_unitState); } catch (e) { console.error('[resume] drain', e); }
   }
 }
 
@@ -421,6 +460,12 @@ function markSent(ledger, key) {
   if (!_unitState) return;
   _unitState[ledger] = _unitState[ledger] || {};
   _unitState[ledger][key] = true;
+  /* Mark in memory always, but persist only once the restore is done. The library
+     is live from stage A, so a statement sent in the window between the stages used
+     to reach this line and write a live capture over the saved payload — the same
+     overwrite the drain had (2026-11-03). The key rides the next save: the stage-B
+     scheduleResumeSave, or any later capture. */
+  if (!_resumeReady) return;
   try { persistUnitState(captureUnitState()); } catch (e) { console.error('[resume] ledger', e); }
 }
 
@@ -462,7 +507,7 @@ function sendCompletedOnce(ledger, key, objectType, result, opts) {
    מניסיון קודם עלולה לשלוח לומד למסלול שהוא לא עבר בפעם הזאת. */
 /* ⚠️ נושא את slug היחידה במכוון. שתי יחידות שחולקות את המפתח הזה חולקות יומן,
    וכל אחת משתיקה בשקט את הדיווחים של השנייה. */
-var NAV_EDGE_KEY = 'lomda_nav_edges::methodica-science-mass-weight-01';
+var NAV_EDGE_KEY = 'lomda_nav_edges::methodica-ar-science-mass-weight-01';
 
 function _readEdges() {
   try {
@@ -637,7 +682,7 @@ function repaintScreen(n) {
 
 /* החלפת מסך — נקודת החנק. מושהה: תוחם את האיבוד למסך אחד. */
 function scheduleResumeSave() {
-  if (!RESUME_ENABLED || !_resumeReady || _restoring) return;
+  if (!RESUME_ENABLED || !_resumeReady || _restoring || _resumeReadFailed) return;
   if (typeof window.saveState720Debounced !== 'function') return;
   try { window.saveState720Debounced(RESUME_STATE_ID, captureUnitState()); } catch (e) {}
 }
@@ -648,7 +693,7 @@ function scheduleResumeSave() {
    בזמן שהמסמך הבא נטען, מספיק זמן ל-timer המיושן לירות **אחרי** הכתיבה
    קדימה. השיגור הבא היה חוזר לתוך הסין שהסתיים. */
 function flushResumeSave() {
-  if (!RESUME_ENABLED || !_resumeReady || _restoring) return;
+  if (!RESUME_ENABLED || !_resumeReady || _restoring || _resumeReadFailed) return;
   if (typeof window.saveState720 !== 'function') return;
   try { window.saveState720(RESUME_STATE_ID, captureUnitState()); } catch (e) {}
 }

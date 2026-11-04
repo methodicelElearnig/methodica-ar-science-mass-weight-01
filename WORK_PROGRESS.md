@@ -2992,3 +2992,27 @@ Open with MOE / script owner, not changed: 01-01 matching table scores 0/1 by de
   `data-dnd-zone="r<r>-c<c>|bank"`) and 03 s26 (`s26dnd`, zones `mass|weight|source`); drop rules unchanged
   (03 capacity/swap included). Loaded in all six parts; harness `SHARED` updated (1075 checks). No keyboard path
   (none before either). Separate branch/commit for an easy revert. `-01 main.js?v=8`, `-03 main.js?v=7`.
+
+## Upgrade to the Hebrew twin + resume hardening + true/false + Arabic identity — branch `vadimr/upgrade-from-he-2026-11` (2026-11-04)
+
+Base: this build came from Hebrew `b8817fd` (2026-10-08). Same change as the Hebrew twin's branch
+`vadimr/fix/resume-tf-2026-11`, plus what only the Arabic build needs.
+
+- **Metadata** (commit `57e1b01`): the Arabic files supplied by the unit owner. Part 06 q2/q3 `answers` /
+  `correctAnswers` set to `true`/`false` with `correctXapiResponsesPattern` (guide §6.3b: never translated).
+- **From Hebrew `3294fe3` + `0f1d657`** (part 01): the learning-path item split (002 choice / 003 video /
+  004 text, old 003–007 → 005–009, resume renumbering) and the `selected` / learning-type statement.
+- **Lost state, boot markup, media, part 06 true/false**: the Hebrew twin's change set (see its WORK_PROGRESS);
+  `20-xapi.js`, `40-resume.js`, `50-loader.js` and `_test/verify-report.js` are copies of the Hebrew files.
+  Arabic `SAQ_LABELS = ['صحيح', 'غير صحيح']`. Images 29.9 MB → 6.6 MB, landing clips 4.1 MB → 0.96 MB.
+- **Hebrew a learner could see** (part 02 screen 19): the dropdown values were `יומיומית` / `מדעית`, shown
+  after a pick and in the solution. Values and labels are now the Arabic targets / sources of metadata
+  02-004; a state saved with the Hebrew ones is translated on restore (`_rsDq19Ar`). Dead-code yes/no
+  fallback `['نعم','لا']`.
+- **Arabic identity** (the ar-mass-measure-01 `9263ef0` pattern): folders, slugs, metadata file names and ids
+  `methodica-ar-science-mass-weight-01-0N`, prefix `https://lomdot.education.gov.il/metodica/720/ar/science/mass-weight/01/`,
+  `UI_CHARACTER_KEY`, `NAV_EDGE_KEY`, the cross-part pass flag `lomda_mw01_ar_standardPass` (no longer shared
+  with the Hebrew unit on the same origin), tools (`$ContentBaseUrl`, `$IdBase`, `$TitleLangKey 'Arabic'`).
+  **Kata: not sent.** ar-mass-measure-01 added its Arabic components to the existing Hebrew unit
+  (`a840a64`, `-ParentUnitKey`, KATA binds a learning objective to one unit); that port is part of the Kata step.
+- Harness: 1142 checks; the asset-sweep floor is 120 here (the 18 Hebrew font url()s are gone with Calibri).

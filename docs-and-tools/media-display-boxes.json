@@ -1,0 +1,23 @@
+{
+  "_about": "Largest box each image is DRAWN in, in 1280x710 design px (the #app canvas), derived 2026-11-04 from each part's css/style.css with object-fit applied: a 'contain' image lists the box its pixels occupy, a 'cover' image lists the frame, a percentage crop lists the scaled image. The zoom panel (.img-zoom-panel 660x660, stage img contain) is included for every image a zoom button points at. reencode-media.py resizes to 2 x the box (cover rule: the larger of the two ratios), never upscales, and skips a shrink under 10 %. point.png (01) and orange.png (03) are referenced nowhere and are not listed.",
+  "astro-earth.png":          [[660, 660], [370, 370], [220, 220], [210, 210]],
+  "astro-moon.png":           [[660, 660], [370, 370], [220, 220], [210, 210]],
+  "digital-scale.png":        [[188, 188]],
+  "cup_scales.png":           [[188, 188]],
+  "hook-char-suitcase.png":   [[609, 343]],
+  "hook-char-phone.png":      [[577, 323]],
+  "hook-char-book.png":       [[614, 345]],
+  "hook-char-package.png":    [[594, 334]],
+  "lamp.png":                 [[130, 130]],
+  "read.png":                 [[224, 224]],
+  "watch.png":                [[224, 224]],
+  "rice_on_scales.png":       [[660, 660], [418, 386]],
+  "galileo.png":              [[660, 660], [380, 380]],
+  "yam_shaked.png":           [[660, 660], [398, 480]],
+  "noa.png":                  [[660, 660], [360, 360]],
+  "farmer.png":               [[660, 495], [360, 420]],
+  "graph_q5.png":             [[660, 342], [592, 307]],
+  "ingredients.png":          [[660, 660], [460, 390], [400, 380]],
+  "flour.png":                [[660, 660], [300, 300]],
+  "char-orange-reminder.png": [[260, 256]]
+}

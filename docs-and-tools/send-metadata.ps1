@@ -36,17 +36,17 @@
 [CmdletBinding()]
 param(
     [switch] $DryRun,
-    # methodica-science-mass-weight-01 (2026-09-24): READ-ONLY check before the first live run.
+    # methodica-ar-science-mass-weight-01 (2026-09-24): READ-ONLY check before the first live run.
     # GETs the unit and every component by key and prints each status — writes nothing to Kata.
     # Needs the key (it reads through the same Resolve-ApiKey, never printing it). Exit 0 when
     # everything is absent (404), 2 when anything already exists (200 — switch to the update path),
     # 1 on any other status (key / network problem). Logs to preflight-metadata.log, so the
     # send-metadata.log of a real run is never overwritten by a check.
     [switch] $Preflight,
-    # methodica-science-mass-weight-01 (2026-09-24): READ-ONLY. GET every component and print its
+    # methodica-ar-science-mass-weight-01 (2026-09-24): READ-ONLY. GET every component and print its
     # publication status (draft | published). Writes nothing. Logs to publish-metadata.log.
     [switch] $Status,
-    # methodica-science-mass-weight-01 (2026-09-24): LIVE and ONE-WAY. Publishes every component that
+    # methodica-ar-science-mass-weight-01 (2026-09-24): LIVE and ONE-WAY. Publishes every component that
     # is still draft (POST /api/v1/component/publish?componentKey=<IRI>). Kata: "One-way — a published
     # component cannot return to draft through this endpoint", and published components "appear in
     # the learning-platform catalog"; publishing freezes the component and item ids. Refuses to start
@@ -111,10 +111,10 @@ if ($Status -or $Publish) { $LogFile = Join-Path $RepoRoot 'publish-metadata.log
 # one, for every component of this unit.
 #
 # Take this from the unit's own DEPLOY.md deploy target. No trailing slash.
-$ContentBaseUrl = 'https://lomdot.education.gov.il/metodica/720/science/mass-weight/01'   # methodica-science-mass-weight-01 (2026-09-24)
+$ContentBaseUrl = 'https://lomdot.education.gov.il/metodica/720/ar/science/mass-weight/01'   # methodica-ar-science-mass-weight-01 (Arabic identity, 2026-11-04)
 # Title language key: wraps a string title into the API object, e.g.
 #   "מדידת מסה" -> { "Hebrew": "מדידת מסה" }. Change only for non-Hebrew content.
-$TitleLangKey = 'Hebrew'
+$TitleLangKey = 'Arabic'
 # ⚠️ NO LONGER SENT (2026-09-09). v2.5 §2.6 renamed the v2.4 component field
 # `manufacture` to the unit field `manufacturer` and retyped it as the ministry's
 # supplier number. It is moot either way, because KATA derives the value itself
@@ -359,7 +359,7 @@ function Invoke-Kata {
     }
 }
 
-# methodica-science-mass-weight-01 (2026-09-24): 200 = exists, 404 = absent, ANYTHING ELSE STOPS
+# methodica-ar-science-mass-weight-01 (2026-09-24): 200 = exists, 404 = absent, ANYTHING ELSE STOPS
 # THE RUN. The mm-03 original read every non-200 as "absent" and POSTed — so a 401/403 (bad key), a
 # 429 or a 5xx would have turned into a spurious create. Stopping here, before the write, is the
 # only safe reading of an answer that is neither yes nor no.

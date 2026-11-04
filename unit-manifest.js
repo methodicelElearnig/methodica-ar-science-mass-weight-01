@@ -20,7 +20,7 @@
 //  orphaned/fabricated screen, and screens 39 and 42 (the sugar-cube and
 //  moon advanced questions) were later cut from the unit — none of the
 //  three must ever be treated as if they exist (see
-//  methodica-science-mass-weight-01-05/index.html, the removed-screen
+//  methodica-ar-science-mass-weight-01-05/index.html, the removed-screen
 //  comments near data-screen="40"/"39"/"42"). Expanding a numeric range
 //  would silently invent these phantom screens; an explicit array cannot.
 // ============================================================
@@ -30,23 +30,23 @@
   // Trailing-slash directory form, not an explicit '.../index.html' filename:
   // some static hosts (e.g. the local `serve` dev server) 301-redirect a
   // request for '.../index.html' to the bare directory path WITHOUT a
-  // trailing slash ('.../methodica-science-mass-weight-01-01', no slash) —
+  // trailing slash ('.../methodica-ar-science-mass-weight-01-01', no slash) —
   // the browser then resolves that component's own relative <script>/<link>
   // tags one directory too shallow, loading the wrong files entirely. A
   // trailing-slash request is never subject to that redirect (there's no
   // '.html' to strip) and every static host already auto-serves index.html
   // for a directory request, so this is strictly safer with no downside.
   var COMPONENTS = [
-    { id: '01', path: 'methodica-science-mass-weight-01-01/', screens: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14] },
-    { id: '02', path: 'methodica-science-mass-weight-01-02/', screens: [15,16,17,18,19,20,21,22,23] },
-    { id: '03', path: 'methodica-science-mass-weight-01-03/', screens: [24,25,26,27,28,29] },
-    { id: '04', path: 'methodica-science-mass-weight-01-04/', screens: [31,32,33,34] },
-    { id: '05', path: 'methodica-science-mass-weight-01-05/', screens: [35,36,37,38,41,43] },
+    { id: '01', path: 'methodica-ar-science-mass-weight-01-01/', screens: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14] },
+    { id: '02', path: 'methodica-ar-science-mass-weight-01-02/', screens: [15,16,17,18,19,20,21,22,23] },
+    { id: '03', path: 'methodica-ar-science-mass-weight-01-03/', screens: [24,25,26,27,28,29] },
+    { id: '04', path: 'methodica-ar-science-mass-weight-01-04/', screens: [31,32,33,34] },
+    { id: '05', path: 'methodica-ar-science-mass-weight-01-05/', screens: [35,36,37,38,41,43] },
     // Component 06 ends on Peak Q3 (47): both Peak end screens
     // ("End — Failure" 48 / "End — Success" 49) were removed per stakeholder
     // request. Peak Q3's continue button ("סיימתי") now finishes the unit
     // directly (restartToComponent01()).
-    { id: '06', path: 'methodica-science-mass-weight-01-06/', screens: [44,45,46,47] }
+    { id: '06', path: 'methodica-ar-science-mass-weight-01-06/', screens: [44,45,46,47] }
   ];
 
   // Flat "which component owns this global screen" lookup — built once,

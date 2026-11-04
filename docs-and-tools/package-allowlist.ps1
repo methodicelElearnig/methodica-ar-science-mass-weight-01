@@ -21,7 +21,7 @@
     This file never ships: docs-and-tools/ is excluded wholesale, and *.ps1 twice over.
 
 .NOTES
-    methodica-science-mass-weight-01 (2026-09-24). build-package.ps1 and
+    methodica-ar-science-mass-weight-01 (2026-09-24). build-package.ps1 and
     verify-package.ps1 are byte-identical to the mass-measure-03 / ratio-01 / ratio-02
     copies; only this file differs. The differences from mass-measure-03's copy, all
     forced by this unit's shape:
@@ -79,7 +79,7 @@ $UnitDirs = @{
 # Inside a part folder: index.html, the code folders, and everything under assets/.
 $ComponentFiles    = @('index.html')
 $ComponentCodeDirs = @{ 'js' = '*.js'; 'css' = '*.css' }
-$ComponentGlob     = 'methodica-science-mass-weight-01-[0-9][0-9]'
+$ComponentGlob     = 'methodica-ar-science-mass-weight-01-[0-9][0-9]'
 
 # No iframe sub-app outside assets/ in this unit (kept for the shared verifier's interface).
 $ComponentSubApps = @()

@@ -3,7 +3,7 @@
 //
 //  Learner-facing: loads component 01 in a single full-viewport iframe
 //  with no chrome. To a learner this is indistinguishable from opening
-//  methodica-science-mass-weight-01-01/index.html directly.
+//  methodica-ar-science-mass-weight-01-01/index.html directly.
 //
 //  QA-facing: if this shell is itself embedded in a QA tool's iframe, it
 //  bridges the SAME DEV_READY/DEV_STATE/DEV_GOTO/DEV_RESET postMessage

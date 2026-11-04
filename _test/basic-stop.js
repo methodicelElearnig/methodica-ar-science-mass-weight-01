@@ -20,7 +20,7 @@ const http = require('http');
 const puppeteer = require('puppeteer-core');
 
 const ROOT = path.resolve(__dirname, '..');
-const PART = 'methodica-science-mass-weight-01-03';
+const PART = 'methodica-ar-science-mass-weight-01-03';
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 let pass = 0; const failures = [];

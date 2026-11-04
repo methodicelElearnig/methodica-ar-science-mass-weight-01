@@ -225,14 +225,14 @@
         .forEach(function (k) { sessionStorage.removeItem(k); });
       sessionStorage.removeItem(LOG_KEY);
       sessionStorage.removeItem(FAIL_KEY);
-      sessionStorage.removeItem('lomda_nav_edges::methodica-science-mass-weight-01');
+      sessionStorage.removeItem('lomda_nav_edges::methodica-ar-science-mass-weight-01');
     } catch (e) {}
     /* localStorage is only a cache of the document; clear it too, exactly like
-       initResumeResetHatch. methodica-science-mass-weight-01 (copied from ratio-01's stub,
+       initResumeResetHatch. methodica-ar-science-mass-weight-01 (copied from ratio-01's stub,
        2026-09-23): this unit's UI_CHARACTER_KEY and RESULT_KEYS from unit-js/40-resume.js. */
     try {
-      localStorage.removeItem('methodica_science_mass_weight_01_selectedCharacter');
-      ['lomda_mw01_standardPass']
+      localStorage.removeItem('methodica_ar_science_mass_weight_01_selectedCharacter');
+      ['lomda_mw01_ar_standardPass']
         .forEach(function (k) { localStorage.removeItem(k); });
     } catch (e) {}
     return 'cleared';

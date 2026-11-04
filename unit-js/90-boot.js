@@ -34,7 +34,7 @@
    האחרות. bootXAPI() עוטף כבר את עצמו פנימה.
 
    אין צורך ב-DOMContentLoaded: התג הזה יושב מיד לפני </body>, ולכן ה-DOM שלם. */
-/* methodica-science-mass-weight-01: the first screen of parts 02-06 has a "חזרה" that calls
+/* methodica-ar-science-mass-weight-01: the first screen of parts 02-06 has a "חזרה" that calls
    goToPrevComponent() (no id), so it is found by its handler rather than by mass-measure-03's #s0-back. */
 function hideCrossPartBack() {
   if (DEV_NAV) return;

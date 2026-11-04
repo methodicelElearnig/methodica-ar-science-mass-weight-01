@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الكتلة والوزن — الهدف 4 — الجزء 05</title>
+  <style>
+    @font-face { font-family: 'Calibri Fit'; src: local('Calibri'), local('Calibri Regular'); font-weight: 100 599; font-style: normal; size-adjust: 110%; }
+    @font-face { font-family: 'Calibri Fit'; src: local('Calibri Bold'), local('Calibri-Bold'); font-weight: 600 900; font-style: normal; size-adjust: 110%; }
+</style>
+  <!-- The shared xAPI library is fetched by unit-js/50-loader.js at the END of the body, i.e. after
+       the parser has already queued every image below; measured live (mass-measure-01), its request
+       did not go out until the last image had finished, which put the resume restore 20-45 s behind
+       a slow line (2026-11-03). Preloading it from the head puts it FIRST in the queue. The href must
+       equal what 50-loader.js builds (no ?v=, no crossorigin) or the browser fetches it twice;
+       the library letter here changes together with LIB720 there (the harness asserts it). -->
+  <link rel="preload" as="script" fetchpriority="high" href="https://lomdot.education.gov.il/metodica/720active/common/xapiwrapper.min.js">
+  <link rel="preload" as="script" fetchpriority="high" href="https://lomdot.education.gov.il/metodica/720active/common/xapi-720-k.js">
+  <link rel="preconnect" href="https://kata.cet.ac.il">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="../unit-css/25-report.css?v=1">
+</head>
+<body>
+
+<!-- ═══ Boot cover (ADDING-REPORTING-AND-RESUME.md §8.11) ═══
+     Hides screen 0 while a saved position is read and painted, so the learner never sees the
+     first screen flash before the restored one. A SIBLING of #app (scaleApp transforms #app).
+     unit-js/50-loader.js removes it on every exit path (dropBootCover); this inline net removes it
+     after 800 ms regardless — or, while a restore is in flight (window.__resumeInFlight), waits for
+     it up to a hard 6 s. Copied from methodica-science-mass-measure-03. -->
+<div id="boot-cover" style="position:fixed;inset:0;z-index:9999;background:#fff"></div>
+<script>
+(function () {
+  /* A Kata launch (registration in the query) may have a document to restore: raise the
+     flag HERE, before any script is fetched. bootXAPI raises it too, but it runs from the
+     last script tag, and on a cold cache those scripts arrive after the 800 ms below — so
+     the cover used to drop before the flag existed, exposing screen 0 for the whole wait
+     (2026-11-03). Without a registration (local, dev) the 800 ms behaviour is unchanged. */
+  if (/[?&]registration=/.test(location.search)) window.__resumeInFlight = true;
+  var t0 = Date.now();
+  function tick() {
+    var c = document.getElementById('boot-cover');
+    if (!c || !c.parentNode) return;
+    if (window.__resumeInFlight && Date.now() - t0 < 6000) { setTimeout(tick, 100); return; }
+    c.parentNode.removeChild(c);
+  }
+  setTimeout(tick, 800);
+})();
+</script>
+<div id="app">
+  <!-- ── End screen 47 ───────────────────────────────────────────────── -->
+  <!-- ── End screen 31 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 32: TransitionScreen — שאלות מתקדמות ─────────────── -->
+  <section class="screen active" data-screen="35" id="s33">
+
+    <div class="s0-content">
+      <div class="s0-text">
+        <div class="s0-slot1"></div>
+        <p  class="s12-suptitle s12-anim" id="s30-suptitle"></p>
+        <h1 class="s12-bigtitle s12-anim" id="s30-bigtitle"></h1>
+        <p  class="s12-subtitle s12-anim" id="s30-subtitle"></p>
+      </div>
+      <div class="s12-char-area">
+        <div class="s12-bubble-wrap s12-anim" id="s30-bubble">
+          <img class="s12-bubble-img" src="../unit-assets/img/hook-orange-bubble.svg" alt="">
+          <p class="s12-bubble-text" dir="rtl" id="s30-bubble-text"></p>
+        </div>
+        <video id="s30-char" class="s12-char-gif s12-anim" autoplay loop muted playsinline aria-hidden="true"></video>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s30-continue" class="btn-continue btn-advance" disabled onclick="goTo(SCREEN_ADVANCED_Q1)"></button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goToPrevComponent()">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 32 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen: Applet Guide — מסך הדרכה ליישומון (script slide 99) ──────
+       Not a question, not a TransitionScreen — an instruction screen that
+       introduces the interactive Galileo free-fall applet used by
+       Advanced Q1 (next screen). Right: instructional text, verbatim from
+       the script, with the three required phrases emphasized exactly as
+       written ("מסה שונה" / "מסה זהה" / "האם גם הם יגיעו באותו זמן
+       לקרקע?"). Left: a dedicated, final placeholder container
+       (#galileo-applet-container) sized/positioned for the real
+       interactive HTML widget the script calls for; the widget itself is
+       pending direct producer coordination (see LOCAL_SETUP.md / script
+       note "דברו איתי בעפ בנושא – רוני"). The dev-only label inside the
+       placeholder is a visual stand-in only, not real content. Reuses the
+       .sadv-layout two-column grid already used by sibling SCQImage
+       screens for visual consistency. -->
+  <section class="screen" data-screen="36" id="sAdvGuide">
+
+    <div class="sadv-layout">
+      <div class="sadv-qa-area guide-text-area">
+        <h1 class="guide-heading guide-anim" id="sAdvGuide-heading">إعادة تنفيذ تجربة غاليليو‎:</h1>
+        <p class="guide-body guide-anim" id="sAdvGuide-p1" dir="rtl">في هذه الفعالية، ستعيدون تنفيذ وتوسيع تجربة غاليليو.<br>أسقطَ غاليليو غرضين بهما <strong>كتلتان مختلفتان</strong>، فوصلا إلى الأرض في نفس الوقت‎.</p>
+        <p class="guide-body guide-anim" id="sAdvGuide-p2" dir="rtl">وهنا - ستجربون إسقاط غرضين لهما <strong>كتلتان متساويتان</strong>، لكنهما مختلفان في الشكل.<br><strong>هل سيصلان هما أيضًا إلى الأرض في نفس الوقت؟</strong></p>
+        <p class="guide-body guide-anim" id="sAdvGuide-p3" dir="rtl">جرّبوا بأنفسكم وافحصوا (هنا، على اليسار<span class="guide-arrow" aria-hidden="true">&#8592;</span>)‎.</p>
+        <p class="guide-body guide-anim" id="sAdvGuide-p4" dir="rtl">نتائج أزمنة الهبوط هي بهدف التوضيح فقط‎.</p>
+      </div>
+      <div class="sadv-img-area">
+        <div id="galileo-applet-container" class="sadv-img-placeholder guide-anim">
+          <div class="applet-embed-wrap">
+            <iframe src="assets/widgets/galileo-applet/index.html" title="تطبيق تجربة غاليليو — إسقاط الأغراض" frameborder="0"></iframe>
+          </div>
+          <button class="applet-expand-btn" onclick="galileoOpenModal()" aria-label="تكبير التطبيق">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="21" height="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="sAdvGuide-continue" class="btn-continue btn-advance" disabled onclick="goTo(SCREEN_ADVANCED_Q1)">متابعة</button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_ADVANCED)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen: Applet Guide ────────────────────────────────────── -->
+
+  <!-- ── Screen 33: Advanced Q1 — SCQImage (section א — שחזור ניסוי גלילאו) ──
+       Was showing stale/unrelated content (an "astronaut" question absent
+       from the current script). Replaced per script slides 99-107: a
+       Galileo free-fall reconstruction, presented as two sections (א, ב).
+       This screen is section א (slide 100-103); section ב is the next
+       screen (see "Screen 33b" below).
+       No hint button: script explicitly says "ללא כפתור רמז" for both
+       sections.
+       Script calls for a live interactive HTML widget here ("יישומון –
+       שמור בתיקייה כקובץ HTML להמחשה"), explicitly flagged by the producer
+       as needing direct coordination ("דברו איתי בעפ בנושא – רוני") — not
+       something to build from guesswork. Left as a placeholder pending
+       that widget; the question itself (text/options/feedback/attempts)
+       is fully implemented and playable without it. -->
+  <section class="screen" data-screen="37" id="s34">
+
+    <div class="s15-progress">
+      <div class="s15-prog-item is-current">
+        <div class="s15-prog-dot is-current"></div>
+        <span class="s15-prog-label">سؤال 1</span>
+      </div>
+      <div class="s15-prog-line"></div>
+      <div class="s15-prog-item">
+        <div class="s15-prog-dot"></div>
+        <span class="s15-prog-label">سؤال 2</span>
+      </div>
+      <div class="s15-prog-line"></div>
+      <div class="s15-prog-item">
+        <div class="s15-prog-dot"></div>
+        <span class="s15-prog-label">سؤال 3</span>
+      </div>
+    </div>
+
+    <div class="sadv-layout">
+      <div class="sadv-qa-area">
+        <p class="q-galileo-recap s11-anim" id="s31-heading"></p>
+        <p class="s11-question s11-anim" id="s31-question"></p>
+        <div class="s11-options" id="s31-options">
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(33,0)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(33,1)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(33,2)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(33,3)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+        </div>
+      </div>
+      <div class="sadv-img-area">
+        <div class="sadv-img-placeholder" style="position:relative;">
+          <div id="s31-img" class="applet-embed-outer s11-anim">
+            <div class="applet-embed-wrap">
+              <iframe src="assets/widgets/galileo-applet/index.html" title="تطبيق تجربة غاليليو — إسقاط الأغراض" frameborder="0"></iframe>
+            </div>
+          </div>
+          <button class="applet-expand-btn" onclick="galileoOpenModal()" aria-label="تكبير التطبيق">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="21" height="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback" id="s31-feedback" data-fb-draggable style="display:none" dir="rtl">
+      <div class="feedback-head">
+        <p class="feedback-title" id="s31-fb-title"></p>
+      </div>
+      <p class="feedback-body" id="s31-fb-body"></p>
+    </div>
+
+    <div class="s11-hint-overlay" id="s31-hint-overlay" style="display:none">
+      <div class="s11-hint-blur"></div>
+      <div class="s11-hint-card" dir="rtl">
+        <div class="s11-hint-card-title">
+          <svg width="36" height="31" viewBox="0 0 26 22.2883" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M17.7925 2.76345C16.3676 1.37911 14.5057 0.68776 12.5488 0.815545C9.07995 1.04163 6.27286 3.9168 6.01796 7.50134C5.85646 9.77363 6.7035 11.9443 8.34374 13.4548C9.23036 14.2723 9.74016 15.465 9.74016 16.7265H11.2284H14.7733H16.2615C16.2615 15.4847 16.7919 14.2707 17.7181 13.3959C19.17 12.0263 20.0012 10.0751 20.0012 8.04361C20.0012 6.01215 19.1953 4.12486 17.7909 2.76018L17.7925 2.76345ZM13.0001 5.54524C11.6701 5.54524 10.5856 6.66582 10.5856 8.04525C10.5856 8.46956 10.2515 8.81524 9.84149 8.81524C9.43143 8.81524 9.09736 8.46956 9.09736 8.04525C9.09736 5.8172 10.8484 4.00527 13.0001 4.00527C13.4133 4.00527 13.7473 4.35094 13.7473 4.77525C13.7473 5.19957 13.4133 5.54524 13.0001 5.54524Z" fill="white"/>
+            <path d="M9.73858 19.6245C9.73858 20.3289 9.99823 20.9908 10.478 21.4904L10.4938 21.5068C10.9783 22.0098 11.6242 22.2883 12.3114 22.2883H13.6888C14.3775 22.2883 15.025 22.0114 15.5111 21.5052C15.9956 21.0039 16.2631 20.3355 16.2631 19.6277V17.9895H9.73858V19.6245ZM11.2268 19.5294H14.7717V19.6277C14.7717 19.9243 14.6609 20.2077 14.4566 20.419C14.254 20.6254 13.9753 20.7483 13.6888 20.7483H12.3114C12.028 20.7483 11.7588 20.6336 11.5561 20.4305L11.5451 20.4174C11.3424 20.211 11.2268 19.9226 11.2268 19.6261V19.5311V19.5294Z" fill="white"/>
+            <path d="M25.2558 7.27531H22.607C22.1954 7.27531 21.8629 7.62099 21.8629 8.0453C21.8629 8.46961 22.197 8.81529 22.607 8.81529H25.2558C25.6674 8.81529 25.9999 8.46961 25.9999 8.0453C25.9999 7.62099 25.6658 7.27531 25.2558 7.27531Z" fill="white"/>
+            <path d="M4.1386 8.0453C4.1386 7.61935 3.80453 7.27531 3.39447 7.27531H0.744124C0.332481 7.27531 0 7.62099 0 8.0453C0 8.46961 0.334064 8.81529 0.744124 8.81529H3.39289C3.80453 8.81529 4.13701 8.46961 4.13701 8.0453H4.1386Z" fill="white"/>
+            <path d="M20.8702 3.11398C21.0175 3.11398 21.1663 3.06811 21.2961 2.97472L23.4667 1.40198C23.804 1.15788 23.8847 0.677863 23.6488 0.328911C23.4129 -0.0200418 22.949 -0.105232 22.6118 0.140509L20.4412 1.71325C20.1039 1.95736 20.0232 2.43737 20.2591 2.78632C20.4032 3.00094 20.6343 3.11562 20.8702 3.11562V3.11398Z" fill="white"/>
+            <path d="M4.70372 13.1172L2.53309 14.69C2.19586 14.9341 2.11512 15.4141 2.35102 15.763C2.49509 15.9777 2.72625 16.0923 2.96215 16.0923C3.10939 16.0923 3.25822 16.0465 3.38804 15.9531L5.55867 14.3803C5.8959 14.1362 5.97665 13.6562 5.74074 13.3073C5.50484 12.9583 5.04095 12.8731 4.70372 13.1189V13.1172Z" fill="white"/>
+            <path d="M23.4668 14.6884L21.2961 13.1157C20.9589 12.8716 20.495 12.9567 20.2591 13.3041C20.0232 13.653 20.1055 14.133 20.4412 14.3771L22.6118 15.9499C22.7416 16.0449 22.8904 16.0891 23.0377 16.0891C23.272 16.0891 23.5032 15.9744 23.6488 15.7598C23.8847 15.4109 23.8024 14.9309 23.4668 14.6868V14.6884Z" fill="white"/>
+            <path d="M5.55869 1.71322L3.38806 0.140478C3.05083 -0.103625 2.58694 -0.0184349 2.35104 0.328879C2.11513 0.677832 2.19746 1.15785 2.53311 1.40195L4.70374 2.97469C4.83356 3.06971 4.98239 3.11395 5.12963 3.11395C5.36395 3.11395 5.5951 2.99927 5.74076 2.78465C5.97666 2.4357 5.89434 1.95569 5.55869 1.71158V1.71322Z" fill="white"/>
+          </svg>
+          <p class="s11-hint-body" id="s31-hint-body"></p>
+        </div>
+        <button class="s11-hint-back-btn" onclick="scqGenCloseHint(33)">عودة إلى السؤال</button>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s31-check-btn"    class="btn-continue" disabled onclick="scqGenCheck(33)">هل إجابتي صحيحة؟</button>
+          <button id="s31-continue-btn" class="btn-continue btn-advance" style="display:none" onclick="goTo(SCREEN_ADVANCED_Q1B)">متابعة</button>
+          <button id="s31-hint-btn"     class="btn-hint" style="display:none" onclick="scqGenOpenHint(33)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 21h6M10 15.8V17h4v-1.2A2 2 0 0 1 15.333 15.076C16.945 13.95 18 12.097 18 10c0-3.314-2.686-6-6-6S6 6.686 6 10c0 2.097 1.055 3.95 2.667 5.076A2 2 0 0 1 10 15.8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            هل يمكنني الحصول على تلميح؟
+          </button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_ADVANCED)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 33 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 33b: Advanced Q1 — SCQImage (section ב — שחזור ניסוי גלילאו) ──
+       New screen, inserted between section א (screen 33/34) and Advanced
+       Q2 (screen 34/35) — script slides 104-107. Same "no hint" /
+       "יישומון" placeholder notes as section א apply here too; see that
+       screen's comment for the full explanation. Still "שאלה 1 מתוך 5" in
+       the progress bar (same question, second part) — matches the
+       production notes' own labeling ("שאלה 1 מתוך 5 – סעיף ב'"). -->
+  <section class="screen" data-screen="38" id="s34b">
+
+    <div class="s15-progress">
+      <div class="s15-prog-item is-current">
+        <div class="s15-prog-dot is-current"></div>
+        <span class="s15-prog-label">سؤال 1</span>
+      </div>
+      <div class="s15-prog-line"></div>
+      <div class="s15-prog-item">
+        <div class="s15-prog-dot"></div>
+        <span class="s15-prog-label">سؤال 2</span>
+      </div>
+      <div class="s15-prog-line"></div>
+      <div class="s15-prog-item">
+        <div class="s15-prog-dot"></div>
+        <span class="s15-prog-label">سؤال 3</span>
+      </div>
+    </div>
+
+    <div class="sadv-layout">
+      <div class="sadv-qa-area">
+        <p class="q-galileo-recap s11-anim" id="s34b-heading"></p>
+        <p class="s11-question s11-anim" id="s34b-question"></p>
+        <div class="s11-options" id="s34b-options">
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(50,0)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(50,1)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(50,2)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(50,3)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+        </div>
+      </div>
+      <div class="sadv-img-area">
+        <div class="sadv-img-placeholder" style="position:relative;">
+          <div id="s34b-img" class="applet-embed-outer s11-anim">
+            <div class="applet-embed-wrap">
+              <iframe src="assets/widgets/galileo-applet/index.html" title="تطبيق تجربة غاليليو — إسقاط الأغراض" frameborder="0"></iframe>
+            </div>
+          </div>
+          <button class="applet-expand-btn" onclick="galileoOpenModal()" aria-label="تكبير التطبيق">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="21" height="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback" id="s34b-feedback" data-fb-draggable style="display:none" dir="rtl">
+      <div class="feedback-head">
+        <p class="feedback-title" id="s34b-fb-title"></p>
+      </div>
+      <p class="feedback-body" id="s34b-fb-body"></p>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s34b-check-btn"    class="btn-continue" disabled onclick="scqGenCheck(50)">هل إجابتي صحيحة؟</button>
+          <button id="s34b-continue-btn" class="btn-continue btn-advance" style="display:none" onclick="goTo(SCREEN_ADVANCED_Q3)">متابعة</button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_ADVANCED_Q1)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 33b ──────────────────────────────────────────────── -->
+
+  <!-- ── Modal: full-size Galileo applet (shared by screens 36/37/38) ───
+       Docked previews are scaled to ~62% to fit beside the question
+       text and read small; this shows the same widget (assets/widgets/
+       galileo-applet/) at ~81% of its natural size, the largest that
+       fits the 1280×710 canvas. Same open/close pattern as the screen
+       22 video modal above (galileoOpenModal/galileoCloseModal). -->
+  <div class="galileo-modal-overlay" id="galileo-modal" style="display:none" role="dialog" aria-modal="true" aria-label="تطبيق تجربة غاليليو — مكبّر">
+    <button class="galileo-modal-close" onclick="galileoCloseModal()" aria-label="إغلاق">✕</button>
+    <div class="galileo-modal-box">
+      <div class="applet-embed-wrap">
+        <iframe id="galileo-modal-iframe" src="about:blank" data-src="assets/widgets/galileo-applet/index.html" title="تطبيق تجربة غاليليو — إسقاط الأغراض" frameborder="0"></iframe>
+      </div>
+    </div>
+  </div>
+  <!-- ── End modal ──────────────────────────────────────────────────── -->
+
+  <!-- ── Screen 40 (data-screen="40") removed: was an orphaned, fabricated
+       question ("does mass change when sugar dissolves in water?") with no
+       basis anywhere in the production script. The real Advanced Q2 (sugar,
+       ValueInputQuestion, script slides 108-112) was a single-part question
+       on data-screen="39" — no section ב existed for it in the script.
+       Confirmed unreachable before removal: no other screen's nav pointed at
+       data-screen="40", and the SCREEN_ADVANCED_Q2B constant was defined but
+       never referenced anywhere. -->
+
+  <!-- ── Screen 34 / data-screen="39" (Advanced Q2, sugar-cube VIQ) removed
+       2026-08-25: cut from the unit per explicit request. The advanced-
+       questions progress stepper (.s15-progress) on the remaining screens
+       was renumbered from 5 items to 3 accordingly — see WORK_PROGRESS.md. -->
+
+  <!-- ── Screen 36: Advanced Q3 — SCQImage ────────────────────────── -->
+  <section class="screen" data-screen="41" id="s37">
+
+    <div class="s15-progress">
+      <div class="s15-prog-item is-done">
+        <div class="s15-prog-dot is-done"></div>
+        <span class="s15-prog-label">سؤال 1</span>
+      </div>
+      <div class="s13-prog-line is-done"></div>
+      <div class="s15-prog-item is-current">
+        <div class="s15-prog-dot is-current"></div>
+        <span class="s15-prog-label">سؤال 2</span>
+      </div>
+      <div class="s15-prog-line"></div>
+      <div class="s15-prog-item">
+        <div class="s15-prog-dot"></div>
+        <span class="s15-prog-label">سؤال 3</span>
+      </div>
+    </div>
+
+    <div class="sadv-layout">
+      <div class="sadv-qa-area">
+        <p class="s11-question s11-anim" id="s34-question"></p>
+        <div class="s11-options" id="s34-options">
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(36,0)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(36,1)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(36,2)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+          <button class="s11-option s11-anim" role="radio" onclick="scqGenSelect(36,3)"><span class="s11-radio"><span class="s11-radio-icon"></span></span><span class="s11-option-text"></span></button>
+        </div>
+      </div>
+      <div class="sadv-img-area">
+        <div class="sadv-img-placeholder" style="position:relative;">
+          <button class="img-zoom-btn" type="button" aria-label="تكبير الصورة"
+                  data-zoom-src="" data-zoom-alt="" data-zoom-from="s34-img">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+
+          <img id="s34-img" class="sadv-img s11-anim" src="" alt="مزارع في حقل أرزّ">
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback" id="s34-feedback" data-fb-draggable style="display:none" dir="rtl">
+      <div class="feedback-head">
+        <p class="feedback-title" id="s34-fb-title"></p>
+      </div>
+      <p class="feedback-body" id="s34-fb-body"></p>
+    </div>
+
+    <div class="s11-hint-overlay" id="s34-hint-overlay" style="display:none">
+      <div class="s11-hint-blur"></div>
+      <div class="s11-hint-card" dir="rtl">
+        <div class="s11-hint-card-title">
+          <svg width="36" height="31" viewBox="0 0 26 22.2883" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M17.7925 2.76345C16.3676 1.37911 14.5057 0.68776 12.5488 0.815545C9.07995 1.04163 6.27286 3.9168 6.01796 7.50134C5.85646 9.77363 6.7035 11.9443 8.34374 13.4548C9.23036 14.2723 9.74016 15.465 9.74016 16.7265H11.2284H14.7733H16.2615C16.2615 15.4847 16.7919 14.2707 17.7181 13.3959C19.17 12.0263 20.0012 10.0751 20.0012 8.04361C20.0012 6.01215 19.1953 4.12486 17.7909 2.76018L17.7925 2.76345ZM13.0001 5.54524C11.6701 5.54524 10.5856 6.66582 10.5856 8.04525C10.5856 8.46956 10.2515 8.81524 9.84149 8.81524C9.43143 8.81524 9.09736 8.46956 9.09736 8.04525C9.09736 5.8172 10.8484 4.00527 13.0001 4.00527C13.4133 4.00527 13.7473 4.35094 13.7473 4.77525C13.7473 5.19957 13.4133 5.54524 13.0001 5.54524Z" fill="white"/>
+            <path d="M9.73858 19.6245C9.73858 20.3289 9.99823 20.9908 10.478 21.4904L10.4938 21.5068C10.9783 22.0098 11.6242 22.2883 12.3114 22.2883H13.6888C14.3775 22.2883 15.025 22.0114 15.5111 21.5052C15.9956 21.0039 16.2631 20.3355 16.2631 19.6277V17.9895H9.73858V19.6245ZM11.2268 19.5294H14.7717V19.6277C14.7717 19.9243 14.6609 20.2077 14.4566 20.419C14.254 20.6254 13.9753 20.7483 13.6888 20.7483H12.3114C12.028 20.7483 11.7588 20.6336 11.5561 20.4305L11.5451 20.4174C11.3424 20.211 11.2268 19.9226 11.2268 19.6261V19.5311V19.5294Z" fill="white"/>
+            <path d="M25.2558 7.27531H22.607C22.1954 7.27531 21.8629 7.62099 21.8629 8.0453C21.8629 8.46961 22.197 8.81529 22.607 8.81529H25.2558C25.6674 8.81529 25.9999 8.46961 25.9999 8.0453C25.9999 7.62099 25.6658 7.27531 25.2558 7.27531Z" fill="white"/>
+            <path d="M4.1386 8.0453C4.1386 7.61935 3.80453 7.27531 3.39447 7.27531H0.744124C0.332481 7.27531 0 7.62099 0 8.0453C0 8.46961 0.334064 8.81529 0.744124 8.81529H3.39289C3.80453 8.81529 4.13701 8.46961 4.13701 8.0453H4.1386Z" fill="white"/>
+            <path d="M20.8702 3.11398C21.0175 3.11398 21.1663 3.06811 21.2961 2.97472L23.4667 1.40198C23.804 1.15788 23.8847 0.677863 23.6488 0.328911C23.4129 -0.0200418 22.949 -0.105232 22.6118 0.140509L20.4412 1.71325C20.1039 1.95736 20.0232 2.43737 20.2591 2.78632C20.4032 3.00094 20.6343 3.11562 20.8702 3.11562V3.11398Z" fill="white"/>
+            <path d="M4.70372 13.1172L2.53309 14.69C2.19586 14.9341 2.11512 15.4141 2.35102 15.763C2.49509 15.9777 2.72625 16.0923 2.96215 16.0923C3.10939 16.0923 3.25822 16.0465 3.38804 15.9531L5.55867 14.3803C5.8959 14.1362 5.97665 13.6562 5.74074 13.3073C5.50484 12.9583 5.04095 12.8731 4.70372 13.1189V13.1172Z" fill="white"/>
+            <path d="M23.4668 14.6884L21.2961 13.1157C20.9589 12.8716 20.495 12.9567 20.2591 13.3041C20.0232 13.653 20.1055 14.133 20.4412 14.3771L22.6118 15.9499C22.7416 16.0449 22.8904 16.0891 23.0377 16.0891C23.272 16.0891 23.5032 15.9744 23.6488 15.7598C23.8847 15.4109 23.8024 14.9309 23.4668 14.6868V14.6884Z" fill="white"/>
+            <path d="M5.55869 1.71322L3.38806 0.140478C3.05083 -0.103625 2.58694 -0.0184349 2.35104 0.328879C2.11513 0.677832 2.19746 1.15785 2.53311 1.40195L4.70374 2.97469C4.83356 3.06971 4.98239 3.11395 5.12963 3.11395C5.36395 3.11395 5.5951 2.99927 5.74076 2.78465C5.97666 2.4357 5.89434 1.95569 5.55869 1.71158V1.71322Z" fill="white"/>
+          </svg>
+          <p class="s11-hint-body" id="s34-hint-body"></p>
+        </div>
+        <button class="s11-hint-back-btn" onclick="scqGenCloseHint(36)">عودة إلى السؤال</button>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s34-check-btn"    class="btn-continue" disabled onclick="scqGenCheck(36)">هل إجابتي صحيحة؟</button>
+          <button id="s34-continue-btn" class="btn-continue btn-advance" style="display:none" onclick="goTo(SCREEN_ADVANCED_Q5)">متابعة</button>
+          <button id="s34-hint-btn"     class="btn-hint" style="display:none" onclick="scqGenOpenHint(36)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 21h6M10 15.8V17h4v-1.2A2 2 0 0 1 15.333 15.076C16.945 13.95 18 12.097 18 10c0-3.314-2.686-6-6-6S6 6.686 6 10c0 2.097 1.055 3.95 2.667 5.076A2 2 0 0 1 10 15.8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            هل يمكنني الحصول على تلميح؟
+          </button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_ADVANCED_Q1B)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 37 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 37 / data-screen="42" (Advanced Q4, moon interpretation-vs-
+       fact SCQ) removed 2026-08-25: cut from the unit per explicit request.
+       The advanced-questions progress stepper (.s15-progress) on the
+       remaining screens was renumbered from 5 items to 3 accordingly —
+       see WORK_PROGRESS.md. -->
+
+  <!-- ── Screen 38: Advanced Q5 — Hotspot Graph ────────────────────── -->
+  <section class="screen" data-screen="43" id="s39">
+
+    <div class="s15-progress">
+      <div class="s15-prog-item is-done">
+        <div class="s15-prog-dot is-done"></div>
+        <span class="s15-prog-label">سؤال 1</span>
+      </div>
+      <div class="s13-prog-line is-done"></div>
+      <div class="s15-prog-item is-done">
+        <div class="s15-prog-dot is-done"></div>
+        <span class="s15-prog-label">سؤال 2</span>
+      </div>
+      <div class="s13-prog-line is-done"></div>
+      <div class="s15-prog-item is-current">
+        <div class="s15-prog-dot is-current"></div>
+        <span class="s15-prog-label">سؤال 3</span>
+      </div>
+    </div>
+
+    <div class="hsp-col">
+      <p class="hsp-question" id="s36-question"></p>
+      <div class="hsp-graph-row hsp-anim">
+        <div class="hsp-graph-wrap" style="position:relative;">
+          <button class="img-zoom-btn" type="button" aria-label="تكبير الرسم البياني"
+                  data-zoom-from="s36-img" data-zoom-alt="رسم بياني لقطار الملاهي">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <img id="s36-img" class="hsp-graph-img" src="" alt="رسم بياني لقطار الملاهي">
+          <div class="hsp-overlay" id="s36-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback" id="s36-feedback" data-fb-draggable style="display:none" dir="rtl" onclick="hspGenFeedbackClick(38)">
+      <div class="feedback-head">
+        <p class="feedback-title" id="s36-fb-title"></p>
+      </div>
+      <p class="feedback-body" id="s36-fb-body"></p>
+    </div>
+
+    <div class="s11-hint-overlay" id="s36-hint-overlay" style="display:none">
+      <div class="s11-hint-blur"></div>
+      <div class="s11-hint-card" dir="rtl">
+        <div class="s11-hint-card-title">
+          <svg width="36" height="31" viewBox="0 0 26 22.2883" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M17.7925 2.76345C16.3676 1.37911 14.5057 0.68776 12.5488 0.815545C9.07995 1.04163 6.27286 3.9168 6.01796 7.50134C5.85646 9.77363 6.7035 11.9443 8.34374 13.4548C9.23036 14.2723 9.74016 15.465 9.74016 16.7265H11.2284H14.7733H16.2615C16.2615 15.4847 16.7919 14.2707 17.7181 13.3959C19.17 12.0263 20.0012 10.0751 20.0012 8.04361C20.0012 6.01215 19.1953 4.12486 17.7909 2.76018L17.7925 2.76345ZM13.0001 5.54524C11.6701 5.54524 10.5856 6.66582 10.5856 8.04525C10.5856 8.46956 10.2515 8.81524 9.84149 8.81524C9.43143 8.81524 9.09736 8.46956 9.09736 8.04525C9.09736 5.8172 10.8484 4.00527 13.0001 4.00527C13.4133 4.00527 13.7473 4.35094 13.7473 4.77525C13.7473 5.19957 13.4133 5.54524 13.0001 5.54524Z" fill="white"/>
+            <path d="M9.73858 19.6245C9.73858 20.3289 9.99823 20.9908 10.478 21.4904L10.4938 21.5068C10.9783 22.0098 11.6242 22.2883 12.3114 22.2883H13.6888C14.3775 22.2883 15.025 22.0114 15.5111 21.5052C15.9956 21.0039 16.2631 20.3355 16.2631 19.6277V17.9895H9.73858V19.6245ZM11.2268 19.5294H14.7717V19.6277C14.7717 19.9243 14.6609 20.2077 14.4566 20.419C14.254 20.6254 13.9753 20.7483 13.6888 20.7483H12.3114C12.028 20.7483 11.7588 20.6336 11.5561 20.4305L11.5451 20.4174C11.3424 20.211 11.2268 19.9226 11.2268 19.6261V19.5311V19.5294Z" fill="white"/>
+            <path d="M25.2558 7.27531H22.607C22.1954 7.27531 21.8629 7.62099 21.8629 8.0453C21.8629 8.46961 22.197 8.81529 22.607 8.81529H25.2558C25.6674 8.81529 25.9999 8.46961 25.9999 8.0453C25.9999 7.62099 25.6658 7.27531 25.2558 7.27531Z" fill="white"/>
+            <path d="M4.1386 8.0453C4.1386 7.61935 3.80453 7.27531 3.39447 7.27531H0.744124C0.332481 7.27531 0 7.62099 0 8.0453C0 8.46961 0.334064 8.81529 0.744124 8.81529H3.39289C3.80453 8.81529 4.13701 8.46961 4.13701 8.0453H4.1386Z" fill="white"/>
+            <path d="M20.8702 3.11398C21.0175 3.11398 21.1663 3.06811 21.2961 2.97472L23.4667 1.40198C23.804 1.15788 23.8847 0.677863 23.6488 0.328911C23.4129 -0.0200418 22.949 -0.105232 22.6118 0.140509L20.4412 1.71325C20.1039 1.95736 20.0232 2.43737 20.2591 2.78632C20.4032 3.00094 20.6343 3.11562 20.8702 3.11562V3.11398Z" fill="white"/>
+            <path d="M4.70372 13.1172L2.53309 14.69C2.19586 14.9341 2.11512 15.4141 2.35102 15.763C2.49509 15.9777 2.72625 16.0923 2.96215 16.0923C3.10939 16.0923 3.25822 16.0465 3.38804 15.9531L5.55867 14.3803C5.8959 14.1362 5.97665 13.6562 5.74074 13.3073C5.50484 12.9583 5.04095 12.8731 4.70372 13.1189V13.1172Z" fill="white"/>
+            <path d="M23.4668 14.6884L21.2961 13.1157C20.9589 12.8716 20.495 12.9567 20.2591 13.3041C20.0232 13.653 20.1055 14.133 20.4412 14.3771L22.6118 15.9499C22.7416 16.0449 22.8904 16.0891 23.0377 16.0891C23.272 16.0891 23.5032 15.9744 23.6488 15.7598C23.8847 15.4109 23.8024 14.9309 23.4668 14.6868V14.6884Z" fill="white"/>
+            <path d="M5.55869 1.71322L3.38806 0.140478C3.05083 -0.103625 2.58694 -0.0184349 2.35104 0.328879C2.11513 0.677832 2.19746 1.15785 2.53311 1.40195L4.70374 2.97469C4.83356 3.06971 4.98239 3.11395 5.12963 3.11395C5.36395 3.11395 5.5951 2.99927 5.74076 2.78465C5.97666 2.4357 5.89434 1.95569 5.55869 1.71158V1.71322Z" fill="white"/>
+          </svg>
+          <p class="s11-hint-body" id="s36-hint-body"></p>
+        </div>
+        <button class="s11-hint-back-btn" onclick="hspGenCloseHint(38)">عودة إلى السؤال</button>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s36-check-btn"    class="btn-continue" disabled onclick="hspGenCheck(38)">هل إجابتي صحيحة؟</button>
+          <button id="s36-continue-btn" class="btn-continue btn-advance" style="display:none" onclick="goToNextComponent()">متابعة</button>
+          <button id="s36-hint-btn"     class="btn-hint" style="display:none" onclick="hspGenOpenHint(38)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 21h6M10 15.8V17h4v-1.2A2 2 0 0 1 15.333 15.076C16.945 13.95 18 12.097 18 10c0-3.314-2.686-6-6-6S6 6.686 6 10c0 2.097 1.055 3.95 2.667 5.076A2 2 0 0 1 10 15.8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            هل يمكنني الحصول على تلميح؟
+          </button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_ADVANCED_Q3)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 44 ───────────────────────────────────────────────── -->
+
+  <!-- ── MODALS (must be outside all .screen divs, inside #app) ── -->
+  <div id="hint-modal"       class="modal-overlay hidden" role="dialog" aria-modal="true"></div>
+  <div id="help-popup"       class="help-popup hidden"    role="tooltip"></div>
+  <div id="revelation-popup" class="popup-overlay hidden" role="dialog" aria-modal="true"></div>
+
+  <!-- ── IMAGE ZOOM MODAL — global, shared across all screens ──── -->
+  <!-- Spec: _global-components.md → "Image zoom" section         -->
+  <div id="img-zoom-modal" class="img-zoom-modal hidden" role="dialog" aria-modal="true" data-zoom-close="true">
+    <div class="img-zoom-panel">
+      <button class="img-zoom-close" type="button" aria-label="إغلاق" data-zoom-close="true">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 1L14 14M14 1L1 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="img-zoom-stage"></div>
+    </div>
+  </div>
+
+  <!-- ── REPORT PROBLEM button (global, outside all .screen divs) ── -->
+  <!-- Default: gray circle. Hover: blue circle + "هل وجدتم مشكلة؟" label -->
+  <!-- SVG fills use var(--flag-color) which changes on hover via CSS -->
+  <button id="report-btn" class="flag-btn" type="button" aria-label="هل وجدتم مشكلة؟">
+    <div class="flag-circle">
+      <div class="flag-inner">
+        <!-- Pole: occupies left 6.62% of the inner icon area -->
+        <div class="flag-pole">
+          <svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible"
+               viewBox="0 0 0.794329 17.0005" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0.397164 17C0.177722 17 0 16.8239 0 16.6065V0.393501C0 0.176082 0.177722 0 0.397164 0C0.616607 0 0.794329 0.176082 0.794329 0.393501V16.607C0.794329 16.8245 0.616607 17.0005 0.397164 17.0005V17Z"
+                  fill="var(--flag-color, #484848)"/>
+          </svg>
+        </div>
+        <!-- Flag body: occupies top ~55% of icon area, full width -->
+        <div class="flag-body-shape">
+          <svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible"
+               viewBox="0 0 12 9.31542" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.76227 9.31542C1.91972 9.31542 1.06958 9.15545 0.213483 8.71363C0.0823588 8.64599 0 8.51124 0 8.36469V0.950975C0 0.814619 0.0715221 0.687925 0.188558 0.615989C0.305594 0.54459 0.45189 0.537611 0.574886 0.598811C0.577053 0.599884 0.578679 0.600958 0.580846 0.602032C2.31309 1.49586 4.05563 1.046 5.90003 0.569821C7.80946 0.0770055 9.78336 -0.431915 11.7865 0.601495C11.9176 0.669136 12 0.803882 12 0.950438V8.36415C12 8.4946 11.9344 8.617 11.8255 8.69001C11.7166 8.76302 11.5774 8.77805 11.4555 8.72974C11.443 8.7249 11.4311 8.71954 11.4197 8.71363C9.68745 7.8198 7.94491 8.26967 6.10051 8.7453C5.00709 9.02714 3.89199 9.31489 2.76281 9.31489L2.76227 9.31542ZM0.793787 8.11935C2.45559 8.87307 4.13094 8.44038 5.90003 7.98407C7.62469 7.53903 9.40191 7.08057 11.2062 7.75806V1.19631C9.54441 0.442591 7.86906 0.875281 6.09997 1.33159C4.37531 1.77663 2.59755 2.23509 0.793787 1.5576V8.11935Z"
+                  fill="var(--flag-color, #484848)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <span class="flag-label">هل وجدتم مشكلة؟</span>
+  </button>
+
+
+  <!-- ═══ "هل وجدتم مشكلة؟" — issue-report dialogs (ADDING-REPORTING-AND-RESUME.md §7) ═══
+       Copied from methodica-science-mass-measure-03-02 (2026-09-24). Last children of #app, outside
+       every .screen: .report-modal-overlay is position:absolute; inset:0 against #app, so it aligns
+       with the scaled canvas. All three carry `hidden`; behaviour in ../unit-js/25-report.js, style in
+       ../unit-css/25-report.css. The .flag-btn above is wired by delegation — no onclick here. -->
+  <div id="report-modal"
+       class="report-modal-overlay"
+       hidden
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="report-modal-title">
+    <div class="report-modal-box">
+      <button class="report-close-btn" type="button" onclick="tryCloseReportModal()" aria-label="إغلاق">&#10005;</button>
+      <h2 class="report-modal-title" id="report-modal-title">التبليغ عن مشكلة</h2>
+      <p class="report-modal-body">هل هناك شيء غير واضح أو لا يعمل كما يجب؟<br>أبلغونا بما حدث لنتمكن معالجة المشكلة.</p>
+
+      <div class="report-field">
+        <label class="report-label" for="report-type"><span class="required-star">*</span> ما نوع المشكلة</label>
+        <div class="report-custom-select" id="report-type-wrapper">
+          <button class="report-select-btn is-placeholder" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="report-select-value">اختاروا نوع المشكلة</span>
+          </button>
+          <ul class="report-select-list" role="listbox" hidden>
+            <li class="report-select-option" data-value="technical" role="option">خلل تقني أو شيء لا يعمل</li>
+            <li class="report-select-option" data-value="unclear" role="option">شيء غير واضح لي</li>
+            <li class="report-select-option" data-value="other" role="option">آخر</li>
+          </ul>
+          <input type="hidden" id="report-type" value="">
+        </div>
+        <span class="report-field-error" id="report-type-error" hidden>اختاروا نوع مشكلة</span>
+      </div>
+
+      <div class="report-field">
+        <label class="report-label" for="report-text"><span class="required-star">*</span> ماذا حدث؟</label>
+        <textarea class="report-textarea" id="report-text" maxlength="250" rows="4" placeholder="فصّلوا ماذا حدث لنتمكن من فهم المشكلة" onblur="reportTextBlur()"></textarea>
+        <span class="report-field-error" id="report-text-error" hidden>اكتبوا ماذا حدث</span>
+        <span class="report-char-count" id="report-char-count">0 / 250</span>
+      </div>
+
+      <div class="report-actions">
+        <button class="report-cancel-btn" type="button" onclick="tryCloseReportModal()">إلغاء</button>
+        <button class="report-submit-btn" type="button" onclick="submitReport()" disabled>إرسال تبليغ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- מצב "הדיווח נשלח". דיאלוג נפרד מדיאלוג הנטישה שמתחתיו — אין לאחד ביניהם. -->
+  <div id="report-thanks-modal"
+       class="report-modal-overlay"
+       hidden
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="report-thanks-title">
+    <div class="report-modal-box report-confirm-box">
+      <h2 class="report-modal-title" id="report-thanks-title">تم إرسال التبليغ، شكرًا!</h2>
+      <p class="report-modal-body">تلقينا التبليغ وسنهتم بالأمر بأقرب وقت.</p>
+      <div class="report-actions">
+        <button class="report-submit-btn" type="button" onclick="closeReportThanks()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- אישור נטישה: נפתח רק כשיש קלט שלא נשלח. -->
+  <div id="report-confirm-modal"
+       class="report-modal-overlay"
+       hidden
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="report-confirm-title">
+    <div class="report-modal-box report-confirm-box">
+      <h2 class="report-modal-title" id="report-confirm-title">هل تريدون إغلاق النافذة فعلًا؟</h2>
+      <p class="report-modal-body">إذا ضغطتم على إغلاق لن يتم إرسال التبليغ</p>
+      <div class="report-actions">
+        <button class="report-cancel-btn" type="button" onclick="forceCloseReportModal()">إغلاق النافذة</button>
+        <button class="report-submit-btn" type="button" onclick="backToReportForm()">أريد التبليغ</button>
+      </div>
+    </div>
+  </div>
+
+
+</div><!-- /#app -->
+<!-- 720 platform layer (reporting / resume): shared files first, the part's own script, 90-boot last -->
+<script src="../unit-js/10-identity.js?v=1"></script>
+<script src="../unit-js/20-xapi.js?v=5"></script>
+<script src="../unit-js/25-report.js?v=1"></script>
+<script src="../unit-js/30-pointer-drag.js?v=1"></script>
+<script src="../unit-js/40-resume.js?v=2"></script>
+<script src="../unit-js/50-loader.js?v=2"></script>
+<script src="js/main.js?v=7"></script>
+<script src="../unit-js/28-feedback-drag.js?v=1"></script>
+<script src="../unit-js/90-boot.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الكتلة والوزن — الهدف 4 — الجزء 04</title>
+  <style>
+    @font-face { font-family: 'Calibri Fit'; src: local('Calibri'), local('Calibri Regular'); font-weight: 100 599; font-style: normal; size-adjust: 110%; }
+    @font-face { font-family: 'Calibri Fit'; src: local('Calibri Bold'), local('Calibri-Bold'); font-weight: 600 900; font-style: normal; size-adjust: 110%; }
+</style>
+  <!-- The shared xAPI library is fetched by unit-js/50-loader.js at the END of the body, i.e. after
+       the parser has already queued every image below; measured live (mass-measure-01), its request
+       did not go out until the last image had finished, which put the resume restore 20-45 s behind
+       a slow line (2026-11-03). Preloading it from the head puts it FIRST in the queue. The href must
+       equal what 50-loader.js builds (no ?v=, no crossorigin) or the browser fetches it twice;
+       the library letter here changes together with LIB720 there (the harness asserts it). -->
+  <link rel="preload" as="script" fetchpriority="high" href="https://lomdot.education.gov.il/metodica/720active/common/xapiwrapper.min.js">
+  <link rel="preload" as="script" fetchpriority="high" href="https://lomdot.education.gov.il/metodica/720active/common/xapi-720-k.js">
+  <link rel="preconnect" href="https://kata.cet.ac.il">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="../unit-css/25-report.css?v=1">
+</head>
+<body>
+
+<!-- ═══ Boot cover (ADDING-REPORTING-AND-RESUME.md §8.11) ═══
+     Hides screen 0 while a saved position is read and painted, so the learner never sees the
+     first screen flash before the restored one. A SIBLING of #app (scaleApp transforms #app).
+     unit-js/50-loader.js removes it on every exit path (dropBootCover); this inline net removes it
+     after 800 ms regardless — or, while a restore is in flight (window.__resumeInFlight), waits for
+     it up to a hard 6 s. Copied from methodica-science-mass-measure-03. -->
+<div id="boot-cover" style="position:fixed;inset:0;z-index:9999;background:#fff"></div>
+<script>
+(function () {
+  /* A Kata launch (registration in the query) may have a document to restore: raise the
+     flag HERE, before any script is fetched. bootXAPI raises it too, but it runs from the
+     last script tag, and on a cold cache those scripts arrive after the 800 ms below — so
+     the cover used to drop before the flag existed, exposing screen 0 for the whole wait
+     (2026-11-03). Without a registration (local, dev) the 800 ms behaviour is unchanged. */
+  if (/[?&]registration=/.test(location.search)) window.__resumeInFlight = true;
+  var t0 = Date.now();
+  function tick() {
+    var c = document.getElementById('boot-cover');
+    if (!c || !c.parentNode) return;
+    if (window.__resumeInFlight && Date.now() - t0 < 6000) { setTimeout(tick, 100); return; }
+    c.parentNode.removeChild(c);
+  }
+  setTimeout(tick, 800);
+})();
+</script>
+<div id="app">
+  <!-- ── End screen 46 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 29: TransitionScreen — משימת כיתה ───────────────── -->
+  <section class="screen active" data-screen="31" id="s30">
+
+    <div class="s0-content">
+      <div class="s0-text">
+        <div class="s0-slot1"></div>
+        <p  class="s12-suptitle s12-anim" id="s27-suptitle"></p>
+        <h1 class="s12-bigtitle s12-anim" id="s27-bigtitle"></h1>
+        <p  class="s12-subtitle s12-anim" id="s27-subtitle"></p>
+      </div>
+      <div class="s12-char-area">
+        <div class="s12-bubble-wrap s12-anim" id="s27-bubble">
+          <img class="s12-bubble-img" src="../unit-assets/img/hook-bubble-white.svg" alt="">
+          <p class="s12-bubble-text" dir="rtl" id="s27-bubble-text"></p>
+        </div>
+        <video id="s27-char" class="s12-char-gif s12-anim" autoplay loop muted playsinline aria-hidden="true"></video>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s27-continue" class="btn-continue btn-advance" disabled onclick="goTo(SCREEN_CLASS_TASK_INST)"></button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goToPrevComponent()">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 29 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 30: Class Task Instructions ───────────────────────── -->
+  <!-- Script slide 93 note: "כפתור 'הזכירו לי את הניסוי...' דלוק תמיד.
+       לחיצה עליו מקפיצה פופאפ עם תזכורת הניסוי (בשקף הבא)" — the reminder
+       popup text (slide 94) is the same Galileo story already told in full
+       on Screen 21 (.s-galileo-*), just recapped here as a popup. Reuses
+       the s28 card's blue/white visual language (not the .s11-hint-*
+       styling) since this is a content recap, not a "רמז" hint. -->
+  <section class="screen" data-screen="32" id="s31">
+
+    <div class="s28-wrap">
+      <div class="s28-card">
+        <div class="s28-card-header">
+          <h2 class="s28-title s28-anim" id="s28-title"></h2>
+        </div>
+        <ol class="s28-steps" id="s28-steps"></ol>
+      </div>
+    </div>
+
+    <div class="s28-reminder-overlay" id="s31-reminder-popup" style="display:none">
+      <div class="s28-reminder-blur"></div>
+      <div class="s28-reminder-card" dir="rtl">
+        <div class="s28-reminder-layout">
+          <div class="s28-reminder-text">
+            <p class="s28-reminder-title"><strong>عام 1589. غاليليو غاليلي، بروفسور شاب في جامعة بيزا، قررَ تحدي فكرة كانت تُعتبَر حقيقة مطلقة حتى ذلك الحين‎.</strong></p>
+            <p class="s28-reminder-body">ادّعى أرسطو أن الجسم الذي له كتلة كبيرة يسقط أسرع من الجسم الذي له كتلة صغيرة.صدّقَ الجميع ذلك، ولم يُجهِد أحد نفسه للتحقق من الأمر.</p>
+            <p class="s28-reminder-body">قرّرَ غاليليو التحقق مما إذا كان ذلك صحيحًا.صعد إلى برج بيزا، أمسك كُرتين، إحداهما من الحديد والأخرى من الخشب - وأسقطهما معًا إلى الأرض‎.</p>
+            <p class="s28-reminder-body"><strong>النتيجة: وصلت كلتا الكُرتين إلى الأرض في نفس الوقت.</strong></p>
+          </div>
+          <div class="s28-reminder-media">
+            <video id="s31-reminder-video" controls playsinline preload="metadata" data-xapi-report="001">
+              <source src="../unit-assets/video/galileo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <button class="s28-reminder-close-btn" onclick="closeGalileoReminder()">عودة إلى المهمة</button>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s28-continue" class="btn-continue btn-advance" disabled onclick="goTo(SCREEN_CLASS_TASK_FORM)"></button>
+          <button class="btn-hint" onclick="openGalileoReminder()">ذكّروني بتجربة غاليليو</button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_CLASS_TASK)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 30 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 31: Class Task Reflection Form ────────────────────── -->
+  <section class="screen" data-screen="33" id="s32">
+
+    <div class="s29-wrap">
+      <h2 class="s29-title s29-anim" id="s29-title"></h2>
+      <div class="s29-card">
+        <div class="s29-fields s29-anim" id="s29-fields"></div>
+        <div class="s29-feedback" id="s29-feedback" data-fb-draggable style="display:none">
+          <p class="s29-feedback-text" id="s29-feedback-text"></p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s29-continue" class="btn-continue btn-advance" disabled onclick="goTo(SCREEN_CLASS_TASK_WRAPUP)"></button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_CLASS_TASK_INST)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 32 ───────────────────────────────────────────────── -->
+
+  <!-- ── Screen 47: Class Task wrap-up — scientific tools (script slide 99) ──
+       Reverted to the blue instructions-card look (.s28-*, same component
+       as screen 31) instead of the speech-bubble layout, per explicit
+       request. All text (title + tools list) sits inside the blue card;
+       the glasses-wearing character gif is pinned to the physical right
+       via the same direction:ltr row trick used elsewhere (e.g. the row
+       reuses .s12-char-area). -->
+  <section class="screen" data-screen="34" id="s47">
+
+    <div class="s0-content">
+      <div class="s12-char-area">
+        <div class="s28-card s12-anim" id="s47-card">
+          <p class="s28-body s12-anim" id="s47-bubble-text" dir="rtl"></p>
+        </div>
+        <video id="s47-char" class="s12-char-gif s12-anim" autoplay loop muted playsinline aria-hidden="true"></video>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <div class="nav-continue-area">
+          <button id="s47-continue" class="btn-continue btn-advance" disabled onclick="goToNextComponent()"></button>
+        </div>
+        <div class="nav-back-area">
+          <button class="btn-back" onclick="goTo(SCREEN_CLASS_TASK_FORM)">عودة</button>
+        </div>
+      </div>
+    </nav>
+
+  </section>
+  <!-- ── End screen 44 ───────────────────────────────────────────────── -->
+
+  <!-- ── MODALS (must be outside all .screen divs, inside #app) ── -->
+  <div id="hint-modal"       class="modal-overlay hidden" role="dialog" aria-modal="true"></div>
+  <div id="help-popup"       class="help-popup hidden"    role="tooltip"></div>
+  <div id="revelation-popup" class="popup-overlay hidden" role="dialog" aria-modal="true"></div>
+
+  <!-- ── IMAGE ZOOM MODAL — global, shared across all screens ──── -->
+  <!-- Spec: _global-components.md → "Image zoom" section         -->
+  <div id="img-zoom-modal" class="img-zoom-modal hidden" role="dialog" aria-modal="true" data-zoom-close="true">
+    <div class="img-zoom-panel">
+      <button class="img-zoom-close" type="button" aria-label="إغلاق" data-zoom-close="true">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 1L14 14M14 1L1 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="img-zoom-stage"></div>
+    </div>
+  </div>
+
+  <!-- ── REPORT PROBLEM button (global, outside all .screen divs) ── -->
+  <!-- Default: gray circle. Hover: blue circle + "هل وجدتم مشكلة؟" label -->
+  <!-- SVG fills use var(--flag-color) which changes on hover via CSS -->
+  <button id="report-btn" class="flag-btn" type="button" aria-label="هل وجدتم مشكلة؟">
+    <div class="flag-circle">
+      <div class="flag-inner">
+        <!-- Pole: occupies left 6.62% of the inner icon area -->
+        <div class="flag-pole">
+          <svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible"
+               viewBox="0 0 0.794329 17.0005" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0.397164 17C0.177722 17 0 16.8239 0 16.6065V0.393501C0 0.176082 0.177722 0 0.397164 0C0.616607 0 0.794329 0.176082 0.794329 0.393501V16.607C0.794329 16.8245 0.616607 17.0005 0.397164 17.0005V17Z"
+                  fill="var(--flag-color, #484848)"/>
+          </svg>
+        </div>
+        <!-- Flag body: occupies top ~55% of icon area, full width -->
+        <div class="flag-body-shape">
+          <svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible"
+               viewBox="0 0 12 9.31542" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.76227 9.31542C1.91972 9.31542 1.06958 9.15545 0.213483 8.71363C0.0823588 8.64599 0 8.51124 0 8.36469V0.950975C0 0.814619 0.0715221 0.687925 0.188558 0.615989C0.305594 0.54459 0.45189 0.537611 0.574886 0.598811C0.577053 0.599884 0.578679 0.600958 0.580846 0.602032C2.31309 1.49586 4.05563 1.046 5.90003 0.569821C7.80946 0.0770055 9.78336 -0.431915 11.7865 0.601495C11.9176 0.669136 12 0.803882 12 0.950438V8.36415C12 8.4946 11.9344 8.617 11.8255 8.69001C11.7166 8.76302 11.5774 8.77805 11.4555 8.72974C11.443 8.7249 11.4311 8.71954 11.4197 8.71363C9.68745 7.8198 7.94491 8.26967 6.10051 8.7453C5.00709 9.02714 3.89199 9.31489 2.76281 9.31489L2.76227 9.31542ZM0.793787 8.11935C2.45559 8.87307 4.13094 8.44038 5.90003 7.98407C7.62469 7.53903 9.40191 7.08057 11.2062 7.75806V1.19631C9.54441 0.442591 7.86906 0.875281 6.09997 1.33159C4.37531 1.77663 2.59755 2.23509 0.793787 1.5576V8.11935Z"
+                  fill="var(--flag-color, #484848)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <span class="flag-label">هل وجدتم مشكلة؟</span>
+  </button>
+
+
+  <!-- ═══ "هل وجدتم مشكلة؟" — issue-report dialogs (ADDING-REPORTING-AND-RESUME.md §7) ═══
+       Copied from methodica-science-mass-measure-03-02 (2026-09-24). Last children of #app, outside
+       every .screen: .report-modal-overlay is position:absolute; inset:0 against #app, so it aligns
+       with the scaled canvas. All three carry `hidden`; behaviour in ../unit-js/25-report.js, style in
+       ../unit-css/25-report.css. The .flag-btn above is wired by delegation — no onclick here. -->
+  <div id="report-modal"
+       class="report-modal-overlay"
+       hidden
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="report-modal-title">
+    <div class="report-modal-box">
+      <button class="report-close-btn" type="button" onclick="tryCloseReportModal()" aria-label="إغلاق">&#10005;</button>
+      <h2 class="report-modal-title" id="report-modal-title">التبليغ عن مشكلة</h2>
+      <p class="report-modal-body">هل هناك شيء غير واضح أو لا يعمل كما يجب؟<br>أبلغونا بما حدث لنتمكن معالجة المشكلة.</p>
+
+      <div class="report-field">
+        <label class="report-label" for="report-type"><span class="required-star">*</span> ما نوع المشكلة</label>
+        <div class="report-custom-select" id="report-type-wrapper">
+          <button class="report-select-btn is-placeholder" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="report-select-value">اختاروا نوع المشكلة</span>
+          </button>
+          <ul class="report-select-list" role="listbox" hidden>
+            <li class="report-select-option" data-value="technical" role="option">خلل تقني أو شيء لا يعمل</li>
+            <li class="report-select-option" data-value="unclear" role="option">شيء غير واضح لي</li>
+            <li class="report-select-option" data-value="other" role="option">آخر</li>
+          </ul>
+          <input type="hidden" id="report-type" value="">
+        </div>
+        <span class="report-field-error" id="report-type-error" hidden>اختاروا نوع مشكلة</span>
+      </div>
+
+      <div class="report-field">
+        <label class="report-label" for="report-text"><span class="required-star">*</span> ماذا حدث؟</label>
+        <textarea class="report-textarea" id="report-text" maxlength="250" rows="4" placeholder="فصّلوا ماذا حدث لنتمكن من فهم المشكلة" onblur="reportTextBlur()"></textarea>
+        <span class="report-field-error" id="report-text-error" hidden>اكتبوا ماذا حدث</span>
+        <span class="report-char-count" id="report-char-count">0 / 250</span>
+      </div>
+
+      <div class="report-actions">
+        <button class="report-cancel-btn" type="button" onclick="tryCloseReportModal()">إلغاء</button>
+        <button class="report-submit-btn" type="button" onclick="submitReport()" disabled>إرسال تبليغ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- מצב "הדיווח נשלח". דיאלוג נפרד מדיאלוג הנטישה שמתחתיו — אין לאחד ביניהם. -->
+  <div id="report-thanks-modal"
+       class="report-modal-overlay"
+       hidden
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="report-thanks-title">
+    <div class="report-modal-box report-confirm-box">
+      <h2 class="report-modal-title" id="report-thanks-title">تم إرسال التبليغ، شكرًا!</h2>
+      <p class="report-modal-body">تلقينا التبليغ وسنهتم بالأمر بأقرب وقت.</p>
+      <div class="report-actions">
+        <button class="report-submit-btn" type="button" onclick="closeReportThanks()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- אישור נטישה: נפתח רק כשיש קלט שלא נשלח. -->
+  <div id="report-confirm-modal"
+       class="report-modal-overlay"
+       hidden
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="report-confirm-title">
+    <div class="report-modal-box report-confirm-box">
+      <h2 class="report-modal-title" id="report-confirm-title">هل تريدون إغلاق النافذة فعلًا؟</h2>
+      <p class="report-modal-body">إذا ضغطتم على إغلاق لن يتم إرسال التبليغ</p>
+      <div class="report-actions">
+        <button class="report-cancel-btn" type="button" onclick="forceCloseReportModal()">إغلاق النافذة</button>
+        <button class="report-submit-btn" type="button" onclick="backToReportForm()">أريد التبليغ</button>
+      </div>
+    </div>
+  </div>
+
+
+</div><!-- /#app -->
+<!-- 720 platform layer (reporting / resume): shared files first, the part's own script, 90-boot last -->
+<script src="../unit-js/10-identity.js?v=1"></script>
+<script src="../unit-js/20-xapi.js?v=5"></script>
+<script src="../unit-js/25-report.js?v=1"></script>
+<script src="../unit-js/30-pointer-drag.js?v=1"></script>
+<script src="../unit-js/40-resume.js?v=2"></script>
+<script src="../unit-js/50-loader.js?v=2"></script>
+<script src="js/main.js?v=6"></script>
+<script src="../unit-js/28-feedback-drag.js?v=1"></script>
+<script src="../unit-js/90-boot.js?v=1"></script>
+</body>
+</html>

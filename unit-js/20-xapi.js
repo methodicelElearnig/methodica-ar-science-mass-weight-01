@@ -3,7 +3,7 @@
    משותף לששת הסינים. Definition-only: אין כאן שום side effect ברמת top-level,
    והאתחול מונע מבלוק ה"אתחול" שבתחתית כל script.js (שקורא ל-bootXAPI() אחרון).
 
-   methodica-science-mass-weight-01 (2026-09-23): copied from
+   methodica-ar-science-mass-weight-01 (2026-09-23): copied from
    methodica-science-mass-measure-03/unit-js/20-xapi.js, with three changes —
      1. xapiAnswerText's drop list re-pointed at this unit's markup;
      2. xapiRequestedHint: the hints ledger persisted in the state document (QA D-7), ported from
@@ -241,16 +241,19 @@ function xapiMultiAnswer(ids, optElFn) {
      correct   האם התשובה נכונה
      isLast    האם זו התשובה האחרונה על השאלה (נכונה, או שנגמרו הניסיונות).
                רק 'answered.last' נכנס למכנה של ניקוד הרכיב.
-     answer    טקסט התשובה של הלומד, כפי שהוא רואה אותה */
-function xapiAnswered(item, qKey, correct, isLast, answer) {
+     answer    טקסט התשובה של הלומד, כפי שהוא רואה אותה
+     response  optional: result.response, the value Kata compares with the question's
+               correctXapiResponsesPattern. Only true/false questions pass it today — the
+               literal 'true' / 'false', never the label (guide §6.3b, 2026-11-04). */
+function xapiAnswered(item, qKey, correct, isLast, answer, response) {
   XAPI_Q_RESULTS[item + '/' + qKey] = !!correct;
   if (!window.XAPI_USING_G || typeof sendStatement720 !== 'function') return;
   try {
-    sendStatement720(isLast ? 'answered.last' : 'answered', 'question',
-      { success: !!correct,
-        score: { scaled: correct ? 1 : 0 },
-        extensions: { student_answer: [answer == null ? '' : String(answer)] } },
-      xapiQ(item, qKey));
+    var result = { success: !!correct,
+      score: { scaled: correct ? 1 : 0 },
+      extensions: { student_answer: [answer == null ? '' : String(answer)] } };
+    if (response != null) result.response = String(response);
+    sendStatement720(isLast ? 'answered.last' : 'answered', 'question', result, xapiQ(item, qKey));
   } catch (e) { console.error('[xAPI] answered ' + item + '/' + qKey, e); }
 }
 
@@ -297,6 +300,24 @@ function xapiRequestedHint(item, qKey) {
     sendStatement720('requested.1', 'question', null, xapiQ(item, qKey));
     XAPI_HINTS_SENT[_k] = true;
   } catch (e) { console.error('[xAPI] requested ' + _k, e); }
+}
+
+/* The learning-path choice — MOE v2.7 'selected', category learning-type (2026-11-02, monday.com 28.10.26:
+   the choice was never reported). object = the component; result.response = the mediaFormat of the
+   chosen path's item, from the part's XAPI_LEARNING_PATHS (agreed deviation from v2.7's contentType,
+   which cannot tell video from reading). Once per distinct path through the 'picks' ledger: re-picking
+   the same path, a resume or a reload stay silent; switching path reports again. Silent while a
+   painter runs, and behind the XAPI_USING_G guard so the ledger never records a statement that never
+   left. Guide: ADDING-REPORTING-AND-RESUME.md §6.3a. */
+function xapiSelectedLearningType(path) {
+  var p = (typeof XAPI_LEARNING_PATHS !== 'undefined') && XAPI_LEARNING_PATHS[path];
+  if (!p || (typeof resumeIsPainting === 'function' && resumeIsPainting())) return;
+  if (!window.XAPI_USING_G || typeof sendStatement720 !== 'function') return;
+  var res = { response: p.mediaFormat }, opts = { category: 'learning-type' };
+  try {
+    if (typeof sendStatementOnce === 'function') sendStatementOnce('picks', 'learning-type/' + path, 'selected', 'onlinelesson', res, opts);
+    else sendStatement720('selected', 'onlinelesson', res, opts);
+  } catch (e) { console.error('[xAPI] selected learning-type', e); }
 }
 
 /* ה-completed של הרכיב. סוגר קודם את הפריט הפתוח, ואז מדווח דרך היומן.

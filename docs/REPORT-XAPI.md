@@ -46,20 +46,22 @@ Verified 2026-09-23 against each item's `informationToBot` and the screen conten
 | 1 | Hook — which character's statement is incorrect | `001` (q1 choice) | `hookCheck` |
 | 2 | Hook wrap-up card ("מסך 2" in 001's description) | `001` | — |
 | 3 | Learning-path choice (video / text) — technical, not graded | `002` | `tosSelect` |
-| 4 | Video path — YouTube `R1cj6siRMoE`, watch gate | `002` | `s4MarkWatched` |
-| 5 | Text path — accordion | `002` | — |
-| 6 | Hotspot — astronaut on Earth | `003` | `s6RevealEarth` |
-| 7 | Hotspot — astronaut on the Moon | `003` | `s6RevealMoon` |
-| 8 | Open question, 2 fields (min length + Hebrew only) | `003` (q1 other, ungraded — **no** `answered`) | `hoqSubmit` |
-| 9 | Knowledge summary | `004` | — |
-| 10 | Carousel — two scale types | `004` | — |
-| 11 | Drag-and-drop summary table (+ View My Answer) | `005` (q1 matching) | `ddq12Check` |
+| 4 | Video path — YouTube `R1cj6siRMoE`, watch gate | `003` | `s4MarkWatched` |
+| 5 | Text path — accordion | `004` | — |
+| 6 | Hotspot — astronaut on Earth | `005` | `s6RevealEarth` |
+| 7 | Hotspot — astronaut on the Moon | `005` | `s6RevealMoon` |
+| 8 | Open question, 2 fields (min length + Hebrew only) | `005` (q1 other, ungraded — **no** `answered`) | `hoqSubmit` |
+| 9 | Knowledge summary | `006` | — |
+| 10 | Carousel — two scale types | `006` | — |
+| 11 | Drag-and-drop summary table (+ View My Answer) | `007` (q1 matching) | `ddq12Check` |
 | 12 | Transition to the warm-ups | `null` | — |
-| 13 | Warm-up 1 — dropdowns (+ View My Answer) | `006` (q1 matching) | `ddrop14Check` |
-| 14 | Warm-up 2 — single choice | `007` (q1 choice) | `scq15Check` |
+| 13 | Warm-up 1 — dropdowns (+ View My Answer) | `008` (q1 matching) | `ddrop14Check` |
+| 14 | Warm-up 2 — single choice | `009` (q1 choice) | `scq15Check` |
 
-Screens 4 and 5 are the two alternative paths of item `002`; both are mapped (D-5: every item reachable
-on every path).
+Screens 4 and 5 are the two alternative paths. Until 2026-10-27 both were item `002` (D-5); the bot then
+answered about the path the learner had not chosen (QA/2026-10-26), so the metadata split them: `002` is
+the choice, `003` the video path, `004` the text path, and the old `003`–`007` moved to `005`–`009`.
+Resume state saved before the split is translated once on load (`_rsRenumberItems`, `-01/js/main.js?v=9`).
 
 ### Component 02 — "זמן תרגול" (screens 15–23)
 
@@ -120,8 +122,8 @@ Item `001` declares no questions: the form reports nothing as `answered` (a `pro
 |---|---|---|---|
 | 44 | Peak intro | `null` | — |
 | 45 | Section A — food labels | `001` q1 | `scqGen` key **40** |
-| 46 | Section B — space-station true/false statements (1 attempt) | `001` q2 | `saqGen` key **41** |
-| 47 | Section C — digital-scale calibration; its "סיימתי" (`s40-continue-btn`) is the part's end button | `001` q3 | `scqGen` key **42** |
+| 46 | Section B — space-station true/false statements (1 attempt) | `001` q2 + q3 (one per statement, `statements[].xapiQ`) | `saqGen` key **41** |
+| 47 | Section C — digital-scale calibration; its "סיימתי" (`s40-continue-btn`) is the part's end button | `001` q4 | `scqGen` key **42** |
 
 **Item `002` ("סיום היחידה") has no screen** since Noa removed part 06's end screens (`b3b55d1`, merged
 2026-09-24). It is published (id frozen), so it stays in the catalogue and is simply never reported, until
@@ -198,15 +200,18 @@ still work there, and the root `index_dev.html` and each part's `index_dev.html`
 - **Open question, screen 8 (01 item 003 q1, "other")** — sends **no** `answered` (since 2026-10-01;
   see "D-9, refined" below). Item 003 reports `initialized`/`completed` only and is not in
   `XAPI_EVAL_ITEMS`.
-- **Statement set, screen 46 (06 q2)** — the catalogue declares one question, so it is one
-  all-or-nothing `answered`, as the code grades it.
+- **Statement set, screen 46 (06 q2 + q3)** — since 2026-11-04 (guide §6.3b) each statement is its own
+  `true-false` question: one `answered.last` per statement, `result.response` the literal `true` /
+  `false` (the learner's boolean, never the label), `success` per statement. Section C moved from q3 to q4.
+  The section score is unchanged (3 of 3). State saved before the split is translated once
+  (`_rsSplitQuestions`, payload `ids: 2`).
 - **Part 03's skip to Standard B stays in production.** It is a screen choice inside part 03, not
   routing between parts. The pass flag crosses components, which the per-component state document
   cannot carry, so part 02 writes it with `setUnitResult` (which also writes `localStorage`) and part 03
   reads `localStorage`; on another device the learner simply sees the basic set.
 - **Videos.** Screen 4 (01) and screens 20/22 (02) are static iframes with `YT.Player` attached — no
   `forigin` possible (guide §6.9.1), verified with a canary (no launch-query bytes in any `src`).
-  Screen 4 reports `played`/`paused` for item 002 and is paused when the learner leaves the screen;
+  Screen 4 reports `played`/`paused` for item 003 (002 before the 2026-10-27 split) and is paused when the learner leaves the screen;
   screen 22 (inline and modal) gets a player once its `src` is set (`enablejsapi=1` added to the
   constant `data-src`) and reports for item 006. Screen 20's muted 6-second loop is décor and is not
   reported (never opt in a loop). Local `galileo.mp4` on screen 21 (02) and in the part-04 reminder
@@ -252,12 +257,12 @@ per declared question, that is a metadata question for the metadata owner, not a
 ### YouTube player attach race (2026-10-06)
 
 MOE QA on part 01: *"אין דיווחי played/paused"*. `played`/`paused` on screen 4 come from the `YT.Player`
-attached to `#s4-video` (`onStateChange` → `xapiYouTubeState(e,'002')`). That player was created only in
+attached to `#s4-video` (`onStateChange` → `xapiYouTubeState(e,'003')`, `'002'` before the 2026-10-27 split). That player was created only in
 `onYouTubeIframeAPIReady`, defined in `main.js` at the end of `<body>`. YouTube's `www-widgetapi.js` is
 async and calls that callback **once**, when it runs; with a warm cache it can run before `main.js`, find
 no callback, and never call it again — no player, no statements, and Continue only via the 84 s fallback.
 
 **Rule.** Players are created by an idempotent `ytInitPlayers()`, called from the callback **and** once
 at load when `YT.loaded` is already set. Each part creates only the players whose iframe it owns (01:
-`#s4-video`; 02: `#s20-yt-iframe`; screen 22 keeps `s22WireYT`). Statements still go to item 002, not to
+`#s4-video`; 02: `#s20-yt-iframe`; screen 22 keeps `s22WireYT`). Statements still go to the item (003 since the 2026-10-27 split), not to
 the component. `-01/js/main.js?v=7`, `-02/js/main.js?v=6`.
