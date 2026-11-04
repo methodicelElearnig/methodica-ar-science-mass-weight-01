@@ -40,6 +40,22 @@ already exists or `POST` if it doesn't — so it's safe to run more than once.
 
 See [KATA-API-DETAILED.md](../../KATA-API-DETAILED.md) for the full endpoint schemas.
 
+## This unit: Arabic components inside the existing Hebrew unit
+
+`methodica-ar-science-mass-weight-01` has **no unit of its own in KATA**. KATA binds a learning objective to
+exactly one unit (`409 "objective already bound to a unit (strict 1:1)"` for ar-math-ratio-01), and the KATA
+team's instruction is to add the Arabic components to the existing unit — as ar-math-ratio-01 and
+ar-science-mass-measure-01 (`a840a64`) do. Ported here 2026-11-04.
+
+- Parent-unit mode is the default: `$ParentUnitKey = 'methodica-science-mass-weight-01'`. The parent is
+  **read-only** — one `GET` confirms it exists; no `POST` / `PATCH` ever goes to the unit (a `PATCH` would
+  overwrite the Hebrew title, sectors and audience). `metadata/*_unit.json` is not read or sent.
+- `-Preflight` checks that the parent EXISTS and reports each Arabic component (absent = ready to create).
+- The Arabic components keep the orders 1–6, the same numbers as the Hebrew ones (KATA accepts repeated orders).
+- Check a send with `retrieve-metadata.ps1 -UnitKey methodica-science-mass-weight-01` before and after.
+- `-ParentUnitKey ''` restores the original behaviour (upsert this repo's own `*_unit.json`).
+- No key file in this repo: pass `-ApiKey` (or `$env:KATA_API_KEY`).
+
 ## Requirements
 
 - **PowerShell 7+** (`pwsh`). The script declares `#Requires -Version 7.0` and will

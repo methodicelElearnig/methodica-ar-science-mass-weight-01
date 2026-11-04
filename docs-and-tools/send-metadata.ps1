@@ -56,6 +56,10 @@ param(
     [string] $ApiKey,
     [string] $BaseUrl,
     [string] $MetadataDir,
+    # The EXISTING Hebrew unit the Arabic components join (2026-11-04, ported from
+    # methodica-ar-science-mass-measure-01 a840a64). Default: 'methodica-science-mass-weight-01'.
+    # '' restores the old behaviour (upsert this repo's own *_unit.json). See the CONFIG note.
+    [string] $ParentUnitKey,
     # Populate item hostedContentRef and NOTHING else — 26 single-field PATCHes.
     # ⚠️ ONE-WAY. Probed 2026-09-11: PATCHing hostedContentRef back to null returns
     # HTTP 200 and is silently ignored, and '' is a 422. There is no supported clear.
@@ -98,6 +102,17 @@ if ($Preflight) { $LogFile = Join-Path $RepoRoot 'preflight-metadata.log' }   # 
 if ($Status -or $Publish) { $LogFile = Join-Path $RepoRoot 'publish-metadata.log' }
 
 # ── (2) PER-UNIT — usually fine as-is ───────────────────────────────────────
+# PARENT UNIT — the Arabic components join the EXISTING Hebrew unit; there is no Arabic unit
+# in KATA. KATA binds a learning objective to exactly one unit (a separate Arabic unit got
+# 409 "objective already bound to a unit (strict 1:1)" for methodica-ar-math-ratio-01), and
+# the KATA team's instruction (2026-09-25) is to add the Arabic components to the existing unit.
+# Ported from methodica-ar-science-mass-measure-01 a840a64 (2026-11-04).
+#
+# When set, the unit is READ-ONLY: one GET confirms it exists, *_unit.json is not read, and
+# no POST/PATCH ever goes to the unit — a PATCH here would overwrite the Hebrew unit's title,
+# sectors and audience with this repo's values. Components are created under this key.
+# -ParentUnitKey '' restores the original behaviour (upsert this repo's own *_unit.json).
+if (-not $PSBoundParameters.ContainsKey('ParentUnitKey')) { $ParentUnitKey = 'methodica-science-mass-weight-01' }
 # Where the CONTENT is served from, for hostedContentRef — the field Kata launches the
 # component from. It must resolve.
 #
@@ -638,10 +653,18 @@ Write-Log ("Mode         : {0}" -f $modeLabel)
 
 # 0) Preflight — READ-ONLY: GET the unit and each component, report, write nothing, exit.
 if ($Preflight) {
-    $pUnitFile = Get-ChildItem -Path $MetadataDir -Filter '*_unit.json' | Select-Object -First 1
-    if (-not $pUnitFile) { Write-Log "No *_unit.json found in $MetadataDir" 'ERROR'; exit 1 }
-    $pUnit = Get-Content -Raw -Path $pUnitFile.FullName -Encoding UTF8 | ConvertFrom-Json
-    $checks = @(@{ Label = 'unit ' + (Get-Slug $pUnit.id); Path = '/api/v1/content-units/' + (Get-Slug $pUnit.id) })
+    if ($ParentUnitKey) {
+        # Parent-unit mode: the parent must EXIST (it is not ours to create); only the components count.
+        $code = Get-ExistsCode ('/api/v1/content-units/' + $ParentUnitKey)
+        Write-Log ("{0} parent unit {1} (HTTP {2}) — read-only, must exist" -f $(if ($code -eq '200') { 'EXISTS ' } else { 'MISSING' }), $ParentUnitKey, $code)
+        if ($code -ne '200') { Write-Log 'Preflight done. The parent unit is not readable — nothing was written.' 'ERROR'; exit 1 }
+        $checks = @()
+    } else {
+        $pUnitFile = Get-ChildItem -Path $MetadataDir -Filter '*_unit.json' | Select-Object -First 1
+        if (-not $pUnitFile) { Write-Log "No *_unit.json found in $MetadataDir" 'ERROR'; exit 1 }
+        $pUnit = Get-Content -Raw -Path $pUnitFile.FullName -Encoding UTF8 | ConvertFrom-Json
+        $checks = @(@{ Label = 'unit ' + (Get-Slug $pUnit.id); Path = '/api/v1/content-units/' + (Get-Slug $pUnit.id) })
+    }
     $pComps = Get-ChildItem -Path $MetadataDir -Filter '*.json' | Where-Object { $_.Name -notlike '*_unit.json' } |
         ForEach-Object { Get-Content -Raw -Path $_.FullName -Encoding UTF8 | ConvertFrom-Json } | Sort-Object { [int] $_.order }
     foreach ($c in $pComps) { $checks += @{ Label = 'component ' + (Get-Slug $c.id); Path = '/api/v1/component?componentKey=' + (Enc $c.id) } }
@@ -703,16 +726,26 @@ if ($Status -or $Publish) {
     exit ($(if ($bad) { 1 } else { 0 }))
 }
 
-# 1) Unit
+# 1) Unit — either an existing parent unit (read-only) or this repo's own unit (upserted)
+$unitOk = $true
+if ($ParentUnitKey) {
+    $unitKey = $ParentUnitKey
+    Write-Log ("Parent unit  : {0} (read-only, not modified)" -f $unitKey)
+    $r = Invoke-Kata 'GET' "/api/v1/content-units/$unitKey" $null
+    $unitOk = $DryRun -or ($r.Code -eq '200')
+    if (-not $unitOk) {
+        Write-Log ("Parent unit {0} not found or not readable (HTTP {1}) — nothing sent." -f $unitKey, $r.Code) 'ERROR'
+    }
+} else {
 $unitFile = Get-ChildItem -Path $MetadataDir -Filter '*_unit.json' | Select-Object -First 1
 if (-not $unitFile) { Write-Log "No *_unit.json found in $MetadataDir" 'ERROR'; exit 1 }
 $unit = Get-Content -Raw -Path $unitFile.FullName -Encoding UTF8 | ConvertFrom-Json
 $unitKey = Get-Slug $unit.id
+}
 
 # In -ItemHostedRefOnly the unit is not touched at all — the whole point of that mode
 # is that exactly one field on 26 items changes and nothing else in the catalogue moves.
-$unitOk = $true
-if (-not $ItemHostedRefOnly) {
+if (-not $ItemHostedRefOnly -and -not $ParentUnitKey) {
     $unitBody  = New-UnitBody $unit
     $unitPatch = Remove-Key $unitBody 'uniqueKey'
     $unitOk = Send-Entity -Label "unit $unitKey" `
