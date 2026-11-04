@@ -60,6 +60,12 @@ param(
     # methodica-ar-science-mass-measure-01 a840a64). Default: 'methodica-science-mass-weight-01'.
     # '' restores the old behaviour (upsert this repo's own *_unit.json). See the CONFIG note.
     [string] $ParentUnitKey,
+    # Required with -Publish in parent-unit mode: the reference of MOE's WRITTEN approval of the
+    # Arabic version (date + who / where). Publishing Arabic components inside the MOE-approved
+    # Hebrew unit approves them automatically, untested by MOE (rule 2026-11-02,
+    # Documentation/KATA/KATA-API.md "Arabic components in a Hebrew unit"). Record it in
+    # SEND-METADATA.md too.
+    [string] $MoeApproval,
     # Populate item hostedContentRef and NOTHING else — 26 single-field PATCHes.
     # ⚠️ ONE-WAY. Probed 2026-09-11: PATCHing hostedContentRef back to null returns
     # HTTP 200 and is silently ignored, and '' is a 422. There is no supported clear.
@@ -682,6 +688,18 @@ if ($Preflight) {
 
 # 0b) Status (read-only) / Publish (live, one-way) — components only; units and items carry no status.
 if ($Status -or $Publish) {
+    # MOE approval gate — before ANY network call (rule 2026-11-02, Documentation/KATA/KATA-API.md).
+    if ($Publish -and $ParentUnitKey) {
+        if (-not "$MoeApproval".Trim()) {
+            $msg = ("REFUSED to publish: these Arabic components join the MOE-approved unit {0}, so publishing " +
+                    "approves them untested. Publish only after MOE approves the Arabic version in writing, and " +
+                    "pass its reference with -MoeApproval '<date, who / where>' (rule 2026-11-02, " +
+                    "Documentation/KATA/KATA-API.md). Nothing was sent.") -f $ParentUnitKey
+            Write-Log $msg 'ERROR'
+            exit 1
+        }
+        Write-Log ("MOE approval : {0}" -f $MoeApproval)
+    }
     $sComps = Get-ChildItem -Path $MetadataDir -Filter '*.json' | Where-Object { $_.Name -notlike '*_unit.json' } |
         ForEach-Object { Get-Content -Raw -Path $_.FullName -Encoding UTF8 | ConvertFrom-Json } | Sort-Object { [int] $_.order }
     function Get-ComponentStatus([string] $iri) {

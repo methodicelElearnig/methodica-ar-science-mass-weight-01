@@ -55,6 +55,17 @@ ar-science-mass-measure-01 (`a840a64`) do. Ported here 2026-11-04.
 - Check a send with `retrieve-metadata.ps1 -UnitKey methodica-science-mass-weight-01` before and after.
 - `-ParentUnitKey ''` restores the original behaviour (upsert this repo's own `*_unit.json`).
 - No key file in this repo: pass `-ApiKey` (or `$env:KATA_API_KEY`).
+- ⚠️ **Publish only with MOE's written approval of the Arabic version** (rule 2026-11-02,
+  `2026/Documentation/KATA/KATA-API.md` → "Arabic components in a Hebrew unit"). The Hebrew unit is
+  MOE-approved, so publishing Arabic components inside it approves them untested. `-Publish` refuses
+  without `-MoeApproval '<date, who / where>'`; record the approval here before publishing.
+
+### Kata status
+
+| Date | What | Who |
+|---|---|---|
+| 2026-11-04 | 6 components + 25 items created in `methodica-science-mass-weight-01` (draft); read back clean | send-metadata.ps1 |
+| — | **MOE approval of the Arabic version: not yet** — components stay `draft` | — |
 
 ## Requirements
 
