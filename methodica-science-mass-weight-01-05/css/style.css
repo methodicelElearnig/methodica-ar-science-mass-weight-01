@@ -381,7 +381,7 @@ button {
   line-height: 1;
   color: #019de5;
   text-align: center;
-  width: 80px;
+  width: max-content;
   display: none;
   white-space: nowrap;
 }
