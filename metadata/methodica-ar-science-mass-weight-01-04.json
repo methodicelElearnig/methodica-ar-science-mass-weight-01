@@ -6,7 +6,7 @@
   "isAssessment": false,
   "recommendedAfterFail": [],
   "isRequired": true,
-  "relativeDifficulty": 3,
+  "relativeDifficulty": 2,
   "masteryLevel": null,
   "order": 4,
   "depthLevel": "core-curriculum-basic",
