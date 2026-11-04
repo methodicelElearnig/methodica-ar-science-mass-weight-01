@@ -3,7 +3,10 @@
   "title": "الكتلة، الوزن والفروق بينهما",
   "subTopic": "MOE.SCI.G7.CHEM.BODY-MAT-PROP.MASS-VOL",
   "learningObjective": "MOE.SCI.G7.CHEM.BODY-MAT-PROP.MASS-VOL.MASS-VS-WEIGHT",
-  "targetSectors": ["state-general", "state-religious"],
+  "targetSectors": [
+    "state-general",
+    "state-religious"
+  ],
   "targetAudience": "general",
   "manufacturer": "310"
 }
