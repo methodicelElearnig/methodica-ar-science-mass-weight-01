@@ -55,7 +55,7 @@ A denylist with one missing entry publishes whatever was forgotten — a new doc
 
 ## Deploy order (ADDING-REPORTING-AND-RESUME.md §11)
 
-1. The library is already on the CDN (`xapi-720-k.js`); verify it by size and signature, not HTTP 200.
+1. The library is already on the CDN (`xapi-720-l.js`, since 2026-11-04); verify it by size and signature, not HTTP 200.
 2. Upload **all parts at once** (and roll back all at once); a part on an old build beside resume-enabled
    parts corrupts the shared ledger's view.
 3. Verify every uploaded file by byte size against `DEPLOY.md` — the MOE CDN answers 200 with 0 bytes

@@ -10,6 +10,7 @@
    `hints` / `picks` ledgers in the document and sendStatementOnce (QA D-7, ported from
    methodica-math-scale-01/unit-js/40-resume.js). RESUME_ENABLED is false until Phase 4 — until then
    _unitState stays null, every ledger fails open, and only the library's per-page dedupe applies.
+   2026-11-06: the leave save goes through xapi-720-l.js's saveState720OnLeave (flushResumeSaveLeaving).
 
    ── מסמך אחד לכל {לומד, רכיב} — כמו במודל של Kata ──
    אומת מול Documentation/KATA/KATA-API.md ומול הערת צוות Kata (2026-09-16):
@@ -698,11 +699,24 @@ function flushResumeSave() {
   try { window.saveState720(RESUME_STATE_ID, captureUnitState()); } catch (e) {}
 }
 
+/* The leave flush (2026-11-05, xapi-720-l.js; methodica-math-percent-03 8b63a4f). Same guards as
+   flushResumeSave, but through saveState720OnLeave: Chrome refuses the synchronous PUT of
+   saveState720 while the page is being dismissed, so on -k every leave save failed and the last
+   debounced change (≤ 800 ms) was lost (KNOWN-ISSUE-dismissal-state-write.md). -l tries the same
+   synchronous PUT first and only when it throws re-sends it as a keepalive fetch. typeof-guarded:
+   on -k this is flushResumeSave. Answer / completion commits stay on flushResumeSave. */
+function flushResumeSaveLeaving() {
+  if (!RESUME_ENABLED || !_resumeReady || _restoring || _resumeReadFailed) return;
+  var save = (typeof window.saveState720OnLeave === 'function') ? window.saveState720OnLeave : window.saveState720;
+  if (typeof save !== 'function') return;
+  try { save(RESUME_STATE_ID, captureUnitState()); } catch (e) {}
+}
+
 /* יציאה מהעמוד. beforeunload לבדו לא מספיק: הוא לא נורה כשלשונית מובייל
    עוברת לרקע ואז נהרגת — וזו בדיוק הדרך שבה לומד עוזב באמצע. */
 function flushResumeSaveOnLeave() {
   if (_leavingToNextPart) return;
-  flushResumeSave();
+  flushResumeSaveLeaving();
 }
 
 /* נרשם מ-90-boot.js. */
