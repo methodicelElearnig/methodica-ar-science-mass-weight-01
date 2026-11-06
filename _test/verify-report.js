@@ -248,7 +248,17 @@ if (EXPECT.reporting) {
   const gate = (/XAPI_USING_G = \/xapi-720-\[([a-z]+)\]\\\.js\//.exec(loaderSrc) || [])[1] || '';
   ok('loader', 'both library letters are named', letters.length === 2, letters.join(','));
   ok('loader', 'every named letter is inside the XAPI_USING_G regex', letters.every((l) => gate.includes(l)), 'regex [' + gate + ']');
-  ok('loader', 'the local stub filename passes the regex', gate.includes('k') && fs.existsSync(path.join(__dirname, 'xapi-720-k.js')));
+  ok('loader', 'both local stubs pass the regex (-l, and -k for the fallback)', gate.includes('k') && gate.includes('l')
+     && fs.existsSync(path.join(__dirname, 'xapi-720-k.js')) && fs.existsSync(path.join(__dirname, 'xapi-720-l.js')));
+  /* Leave save through xapi-720-l.js (2026-11-06; methodica-science-volume-liquid-01 82bddb8, methodica-math-percent-03
+     8b63a4f): Chrome refuses saveState720's synchronous PUT during page dismissal, so on -k the last change before a
+     refresh was lost (Kata 06.11.26). -l adds saveState720OnLeave (sync PUT, keepalive fetch when it throws). */
+  const letterPair = /'xapi-720-([a-z])\.js'\s*:\s*'xapi-720-([a-z])\.js'/.exec(loaderSrc);
+  ok('loader', 'resume loads xapi-720-l.js (the leave save)', letterPair && letterPair[1] === 'l', letterPair && letterPair[1]);
+  const resumeLeaveSrc = read(path.join(BASE, 'unit-js', '40-resume.js'));
+  ok('resume', 'the leave handler goes through saveState720OnLeave, typeof-guarded, with flushResumeSave\'s guards',
+    /function flushResumeSaveOnLeave\(\) \{\s*if \(_leavingToNextPart\) return;\s*flushResumeSaveLeaving\(\);/.test(resumeLeaveSrc)
+    && /function flushResumeSaveLeaving\(\) \{\s*if \(!RESUME_ENABLED \|\| !_resumeReady \|\| _restoring \|\| _resumeReadFailed\) return;\s*var save = \(typeof window\.saveState720OnLeave === 'function'\) \? window\.saveState720OnLeave : window\.saveState720;/.test(resumeLeaveSrc));
 
   /* §3.3 — a var/function declared in both layers is a silent last-wins overwrite. */
   const sharedNames = new Set();
@@ -926,6 +936,21 @@ if (!JSDOM) {
       ok('write-guard', 'the key marked in memory rides the next save', G.stored().doneItems.x === true, JSON.stringify(G.stored()));
       await G.end();
     }
+    /* The leave save (xapi-720-l.js, 2026-11-06): pagehide / beforeunload go through saveState720OnLeave when the
+       library has it (-l), and fall back on saveState720 without it (-k). Neither touches the debounced path. */
+    G = guardPart();
+    if (G) {
+      G.seed();
+      G.run('(function(){ window.__leave = null; window.saveState720OnLeave = function (id, doc) { window.__leave = JSON.parse(JSON.stringify(doc)); return true; };' +
+        ' readUnitState(); _resumeReady = true; goTo(3); flushResumeSaveOnLeave(); return 1; })()');
+      ok('write-guard', 'the leave handler saves the current screen through saveState720OnLeave, and saveState720 is not called',
+         G.run('window.__leave && window.__leave.payload.currentScreen') === 3 && G.stored().payload.currentScreen === 2,
+         'leave=' + G.run('JSON.stringify(window.__leave)') + ' store=' + JSON.stringify(G.stored()));
+      G.run('(function(){ delete window.saveState720OnLeave; goTo(4); flushResumeSaveOnLeave(); return 1; })()');
+      ok('write-guard', 'without saveState720OnLeave (-k) the leave handler falls back on saveState720 with the current screen',
+         G.stored().payload.currentScreen === 4 && G.run('window.__leave.payload.currentScreen') === 3, JSON.stringify(G.stored()));
+      await G.end();
+    }
     G = guardPart();
     if (G) {
       G.seed();
@@ -933,9 +958,10 @@ if (!JSDOM) {
         ' window.stateLastResult720 = function () { return { op: "load", status: 500, ok: false, reason: "rejected" }; }; readUnitState(); return 1; })()');
       ok('write-guard', 'a read that fails (not a 404) is flagged, not taken as a fresh document',
          G.run('_resumeReadFailed') === true && G.run('_unitState.payload') === null);
-      G.run('(function(){ _resumeReady = true; window.__p = persistUnitState(_unitState); flushResumeSave(); markSent("done", "y"); goTo(1); scheduleResumeSave(); return 1; })()');
-      ok('write-guard', 'after a failed read every write is refused and the stored document is untouched',
-         G.run('window.__p') === false && G.stored().payload.currentScreen === 2 && G.stored().done.y === undefined && G.run('window.__debounced') === null,
+      G.run('(function(){ window.__leave = null; window.saveState720OnLeave = function (id, doc) { window.__leave = doc; return true; };' +
+        ' _resumeReady = true; window.__p = persistUnitState(_unitState); flushResumeSave(); markSent("done", "y"); goTo(1); scheduleResumeSave(); flushResumeSaveOnLeave(); return 1; })()');
+      ok('write-guard', 'after a failed read every write is refused (the leave save too) and the stored document is untouched',
+         G.run('window.__p') === false && G.stored().payload.currentScreen === 2 && G.stored().done.y === undefined && G.run('window.__debounced') === null && G.run('window.__leave') === null,
          JSON.stringify(G.stored()));
       G.run('(function(){ window.loadState720 = window.__realLoad; window.stateLastResult720 = function () { return { op: "load", status: 200, ok: true, reason: "ok" }; }; readUnitState(); return 1; })()');
       ok('write-guard', 'a read that succeeds afterwards clears the flag and brings the payload back',
