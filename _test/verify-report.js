@@ -811,6 +811,44 @@ if (!JSDOM) {
            thr.length === 4 && thr.map(function (r) { return r.success + ':' + r.score.scaled; }).join(',') === 'false:0,false:0.5,true:0.75,true:1',
            JSON.stringify(thr));
       }
+      if (c === '03') {
+        /* Score contract (MOE QA runbook §4 "ציון ומעבר"; 2026-11-09, 08.11 sheet fixes 1, 2, pilot
+           body-matter-01 75559c9). Screen 24 promises 3 questions, all of them right. success and
+           score.scaled come from one count of the three basic questions (questionResults); Standard B
+           (004) never enters; success <=> scaled >= 3/3. The stop after Q3 and the last click report
+           the same result. A learner who skipped the basic set (passed part 02) keeps the old result:
+           success:true, scaled over what was asked (Vadim 09.11). */
+        let sc = {};
+        try { sc = JSON.parse(run('(function(){ var orig = xapiEndComponent, keepQ = JSON.stringify(XAPI_Q_RESULTS),' +
+          ' keepR = JSON.stringify(window.lomdaState.questionResults), keepS = basicStopEnded, keepScr = currentScreen, out = { res: [], stop: [], end: [], skip: [] };' +
+          ' xapiEndComponent = function (r) { out.cur.push(r); };' +
+          ' var set = function (k, c, skip) { Object.keys(XAPI_Q_RESULTS).forEach(function (q) { delete XAPI_Q_RESULTS[q]; });' +
+          '   window.lomdaState.questionResults = {};' +
+          '   if (!skip) [1, 2, 3].forEach(function (n) { window.lomdaState.questionResults[n] = n <= k; XAPI_Q_RESULTS["00" + n + "/q1"] = n <= k; });' +
+          '   if (c !== null) XAPI_Q_RESULTS["004/q1"] = c; };' +
+          ' [0, 1, 2, 3].forEach(function (k) { [false, true].forEach(function (c) { set(k, c); var r = typeof xapiPartResult === "function" ? xapiPartResult() : { missing: true }; r.k = k; r.c = c; out.res.push(r); }); });' +
+          ' out.cur = out.stop; [2, 3].forEach(function (k) { set(k, null); basicStopEnded = false; basicContinue(); });' +
+          ' out.cur = out.end; set(3, false); goToNextComponent();' +
+          ' out.cur = out.skip; [true, false].forEach(function (c) { set(0, c, true); goToNextComponent(); });' +
+          ' xapiEndComponent = orig; Object.keys(XAPI_Q_RESULTS).forEach(function (q) { delete XAPI_Q_RESULTS[q]; }); Object.assign(XAPI_Q_RESULTS, JSON.parse(keepQ));' +
+          ' window.lomdaState.questionResults = JSON.parse(keepR); basicStopEnded = keepS; if (currentScreen !== keepScr) goTo(keepScr); delete out.cur;' +
+          ' return JSON.stringify(out); })()')); } catch (e) { sc = {}; }
+        sc.stop = sc.stop || []; sc.end = sc.end || []; sc.skip = sc.skip || [];
+        for (const r of sc.res || []) {
+          const tag = 'score contract ' + r.k + '/3 + Standard B ' + (r.c ? 'right' : 'wrong');
+          ok(c, tag + ': success = correct >= 3', r.success === (r.k >= 3), JSON.stringify(r));
+          ok(c, tag + ': scaled = correct / 3 (004 not counted)', !!r.score && Math.abs(r.score.scaled - r.k / 3) < 1e-9, JSON.stringify(r));
+          ok(c, tag + ': success <=> scaled >= 3/3', !!r.score && r.success === (r.score.scaled >= 1 - 1e-9), JSON.stringify(r));
+        }
+        ok(c, 'score contract: 8 result cases ran', (sc.res || []).length === 8, JSON.stringify(sc).slice(0, 200));
+        ok(c, 'score contract: the stop at 2/3 sends success:false, scaled 2/3; at 3/3 nothing',
+           sc.stop.length === 1 && sc.stop[0].success === false && Math.abs(sc.stop[0].score.scaled - 2 / 3) < 1e-9, JSON.stringify(sc.stop));
+        ok(c, 'score contract: the last click at 3/3 + Standard B wrong sends success:true, scaled 1 (004 not counted)',
+           sc.end.length === 1 && sc.end[0].success === true && sc.end[0].score.scaled === 1, JSON.stringify(sc.end));
+        ok(c, 'skip path (passed part 02, only 004 asked) keeps success:true, scaled = 004 (1, then 0)',
+           sc.skip.length === 2 && sc.skip.every(function (r) { return r.success === true; }) && sc.skip[0].score.scaled === 1 && sc.skip[1].score.scaled === 0,
+           JSON.stringify(sc.skip));
+      }
     }
     if (EXPECT.issueReport) {
       /* ── §7.6: the learner's path through the dialog, with a fetch spy (nothing leaves). ── */

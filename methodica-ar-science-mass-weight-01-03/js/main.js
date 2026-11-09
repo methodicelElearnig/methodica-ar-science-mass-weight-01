@@ -4868,7 +4868,7 @@ let basicStopEnded = false;
 function basicStopBlocks() {
   const qr = window.lomdaState.questionResults || {};
   if ([1, 2, 3].some(function (q) { return typeof qr[q] !== 'boolean'; })) return false;
-  return !(qr[1] && qr[2] && qr[3]);
+  return basicCorrectCount() < XAPI_PASS_K;
 }
 
 function endAtBasicStop() {
@@ -4879,9 +4879,32 @@ function endAtBasicStop() {
     return;
   }
   basicStopEnded = true;
-  const asked = Object.keys(XAPI_Q_RESULTS).length;
-  xapiEndComponent(asked ? { success: false, score: { scaled: xapiCorrectCount() / asked } } : { success: false }, btn);
+  xapiEndComponent(xapiPartResult(), btn);
   try { flushResumeSave(); } catch (e) {}
+}
+
+/* The component result for its 'completed', at the stop and at the last click alike
+   (2026-11-09, 08.11 sheet fixes 1, 2): screen 24 promises 3 questions, all of them right, so
+   success and score.scaled come from one count of the three basic questions (questionResults,
+   restored on resume). Standard B (item 004) sends its own answered and never enters the
+   result (until now the last click sent success:true with scaled over all the questions
+   asked, 004 included).
+   A learner who passed part 02 skips the basic set and answers only 004: no basic question is
+   resolved, and the result stays as before — success:true, scaled over what was asked
+   (docs/REPORT-XAPI.md §4; Vadim 09.11: keep). */
+const XAPI_PASS_K = 3, XAPI_PASS_N = 3;
+function basicCorrectCount() {
+  const qr = window.lomdaState.questionResults || {};
+  return [1, 2, 3].filter(function (q) { return qr[q] === true; }).length;
+}
+function xapiPartResult() {
+  const qr = window.lomdaState.questionResults || {};
+  if (![1, 2, 3].some(function (q) { return typeof qr[q] === 'boolean'; })) {
+    const asked = Object.keys(XAPI_Q_RESULTS).length;
+    return asked ? { success: true, score: { scaled: xapiCorrectCount() / asked } } : { success: true };
+  }
+  const ok = basicCorrectCount();
+  return { success: ok >= XAPI_PASS_K, score: { scaled: ok / XAPI_PASS_N } };
 }
 
 function basicContinue() {
@@ -5623,13 +5646,10 @@ resetScreenState(currentScreen);
 /* Dev-only since 2026-09-16 (the platform owns routing); the button is hidden by hideCrossPartBack(). */
 function goToPrevComponent() { if (!DEV_NAV) return; window.location.href = '../methodica-ar-science-mass-weight-01-02/index.html' + window.location.search + '#screen=23'; }
 /* The part's LAST click (screen 29, #s26-continue-btn): reports the component and stops
-   (ADDING-REPORTING-AND-RESUME.md §6.5, §8.12). No gate on screen, so success:true; the score is
-   over the questions this learner was shown — a learner who passed part 02 skips the basic set and
-   answers only Standard B (docs/REPORT-XAPI.md §4). */
+   (ADDING-REPORTING-AND-RESUME.md §6.5, §8.12). The result is xapiPartResult — the basic set
+   only; a learner who passed part 02 skips it and keeps the old result (docs/REPORT-XAPI.md §4). */
 function goToNextComponent() {
-  const asked = Object.keys(XAPI_Q_RESULTS).length;
-  xapiEndComponent(asked ? { success: true, score: { scaled: xapiCorrectCount() / asked } } : { success: true },
-    document.getElementById('s26-continue-btn'));
+  xapiEndComponent(xapiPartResult(), document.getElementById('s26-continue-btn'));
   if (DEV_NAV) window.location.href = '../methodica-ar-science-mass-weight-01-04/index.html' + window.location.search;
 }
 const STANDARD_PASS_KEY = 'lomda_mw01_ar_standardPass';
