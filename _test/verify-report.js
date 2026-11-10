@@ -45,8 +45,9 @@ const EXPECT = {
   resume: true,       // Phase 4 — RESUME_ENABLED, hooks, boot cover (landed)
 };
 
-/* Catalogue items deliberately left without a screen — see the D-2 check in group 2c. */
-const KNOWN_UNREPORTED = { '06': ['002'] };
+/* Catalogue items deliberately left without a screen — see the D-2 check in group 2c.
+   Empty since 10.11.26: 06-002 existed only in the repo and the Kata -> repo metadata sync removed it. */
+const KNOWN_UNREPORTED = {};
 
 const compSlug = (c) => UNIT_SLUG + '-' + c;
 const compDir = (c) => path.join(BASE, compSlug(c));
@@ -235,6 +236,12 @@ const SHARED = ['10-identity', '20-xapi', '30-pointer-drag', '40-resume', '50-lo
 const topNames = (src) => new Set([...src.matchAll(/^(?:async\s+)?function\s+([\w$]+)|^(?:var|let|const)\s+([\w$]+)/gm)].map((m) => m[1] || m[2]));
 if (EXPECT.reporting) {
   section('2c. xAPI reporting');
+  /* MOE runbook checks 10.11.26: the string builders that produced 'id=value | …' / 'zone: a, b | …' are gone;
+     every site hands xapiAnswered a structured answer that 20-xapi.js formats from the metadata. */
+  ok('xapi', 'retired builders xapiZoneAnswer / xapiFieldsAnswer / xapiMultiAnswer are gone',
+     ![read(path.join(BASE, 'unit-js', '20-xapi.js'))].concat(COMPONENTS.map(mainJs)).some((t) => /xapi(Zone|Fields|Multi)Answer\(/.test(t)));
+  ok('xapi', 'xapiAnswered takes (item, qKey, correct, isLast, answer) and builds result.response',
+     /function xapiAnswered\(item, qKey, correct, isLast, answer\) \{\n  XAPI_Q_RESULTS\[item \+ '\/' \+ qKey\] = !!correct;/.test(read(path.join(BASE, 'unit-js', '20-xapi.js'))));
   const identitySrc = read(path.join(BASE, 'unit-js', '10-identity.js'));
   ok('identity', "XAPI_ID_PREFIX === the catalogue prefix", identitySrc.includes("var XAPI_ID_PREFIX = '" + PREFIX + "';"));
   ok('identity', 'window.XAPI_UNIT_ID === metadata unit id (bare slug)', identitySrc.includes("window.XAPI_UNIT_ID = '" + unitMeta.id + "';"));
@@ -1048,6 +1055,20 @@ if (!JSDOM) {
       T.w.close();
     }
   }
+}
+
+/* ═══════════════════ 4. Kata's correctXapiResponsesPattern (MOE runbook checks 10.11.26) ═══════════════════
+   _test/kata-response.js answers every Kata question right through the page's own check functions and
+   asserts result.response === Kata's pattern, byte for byte. Run here so this suite stays the one gate. */
+section('4. Kata patterns (_test/kata-response.js)');
+{
+  const kr = path.join(REPO, '_test', 'kata-response.js');
+  if (fs.existsSync(kr)) {
+    const out = require('child_process').spawnSync(process.execPath, [kr, BASE], { env: process.env, encoding: 'utf8' });
+    const m = /pass=(\d+)\s+fail=(\d+)/.exec(out.stdout || '');
+    ok('kata', 'kata-response.js: every Kata question sends Kata\'s pattern', !!m && m[2] === '0',
+       m ? 'pass=' + m[1] + ' fail=' + m[2] + '\n' + (out.stdout || '').split('\n').filter((l) => /FAIL/.test(l)).slice(0, 8).join('\n') : (out.stderr || '').slice(0, 300));
+  } else skip('kata-response.js');
 }
 
 /* ═══════════════════════════════ summary ═══════════════════════════════ */

@@ -3751,7 +3751,7 @@ function scqGenCheck(sid) {
   /* xAPI: the engine is keyed by the LEGACY screen number; XAPI_GEN_Q (config block) names the item. */
   const _xq = (typeof XAPI_GEN_Q !== 'undefined') && XAPI_GEN_Q[sid];
   if (_xq) xapiAnswered(_xq[0], _xq[1], isCorrect, isCorrect || state.attempts >= cfg.maxAttempts,
-    cfg.options[state.selected]);
+    xapiChoiceOf(_xq[0], _xq[1], cfg.options[state.selected], isCorrect));
   const opts      = Array.from(document.querySelectorAll('#' + cfg.optionsContainerId + ' .s11-option'));
 
   if (isCorrect) {
@@ -4339,8 +4339,14 @@ function hspGenCheck(sid) {
   const allCorrect = groupsPicked[0] === 'green' && groupsPicked[1] === 'orange';
   /* xAPI: before the first-wrong branch clears state.selected. */
   const _xq = (typeof XAPI_GEN_Q !== 'undefined') && XAPI_GEN_Q[sid];
-  if (_xq) xapiAnswered(_xq[0], _xq[1], allCorrect, allCorrect || state.attempts >= cfg.maxAttempts,
-    state.selected.join(', ') + ' (' + hspGenSig(sid) + ')');
+  /* 2026-11-10, MOE runbook class L3: the points have no names on screen; the grading is by group.
+     Proposed Kata entry (repo metadata/, not in Kata yet): a choice question whose answers are the
+     three groups — rise, fall, baseline — and whose pattern is "rise[,]fall". The picks go out as
+     those groups (indexes into answers, emitted in answers order). While Kata still holds the old
+     'other' entry the text below is what is sent, unchanged. */
+  if (_xq) xapiAnswered(_xq[0], _xq[1], allCorrect, allCorrect || state.attempts >= cfg.maxAttempts, {
+    choices: state.selected.map(function (id) { return XAPI_HSP_GROUP[cfg.zones.find(function (z) { return z.id === id; }).color]; }),
+    text: state.selected.join(', ') + ' (' + hspGenSig(sid) + ')' });
   if (!allCorrect && state.attempts < cfg.maxAttempts) state.lastWrong = hspGenSig(sid);   // Retry gate (QA D-14)
 
   const fb = { title: '', body: '' };
@@ -5295,6 +5301,8 @@ var XAPI_METADATA_FILE = '../metadata/methodica-ar-science-mass-weight-01-05.jso
 /* The part's last button (D-8: restoreEndedButton keeps it disabled once the ledger says done). */
 var XAPI_END_BTN = 's36-continue-btn';
 /* The generic engines are keyed by LEGACY screen numbers (docs/REPORT-XAPI.md §2): key -> [item, q]. */
+/* 05-003 hotspot: the zone colour group -> its index in the proposed Kata answers (rise, fall, baseline). */
+var XAPI_HSP_GROUP = { green: 0, orange: 1, blue: 2 };
 var XAPI_GEN_Q = { 33: ['001', 'q1'], 50: ['001', 'q2'], 36: ['002', 'q1'], 38: ['003', 'q1'] };
 
 /* ═══════════════════ Resume (720) — the four per-part hooks ═══════════════════

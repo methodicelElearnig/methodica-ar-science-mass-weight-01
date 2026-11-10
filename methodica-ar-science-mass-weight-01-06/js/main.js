@@ -3750,7 +3750,7 @@ function scqGenCheck(sid) {
   /* xAPI: the engine is keyed by the LEGACY screen number; XAPI_GEN_Q (config block) names the item. */
   const _xq = (typeof XAPI_GEN_Q !== 'undefined') && XAPI_GEN_Q[sid];
   if (_xq) xapiAnswered(_xq[0], _xq[1], isCorrect, isCorrect || state.attempts >= cfg.maxAttempts,
-    cfg.options[state.selected]);
+    xapiChoiceOf(_xq[0], _xq[1], cfg.options[state.selected], isCorrect));
   const opts      = Array.from(document.querySelectorAll('#' + cfg.optionsContainerId + ' .s11-option'));
 
   if (isCorrect) {
@@ -5028,8 +5028,7 @@ function saqGenCheck(sid) {
   const _xq = (typeof XAPI_GEN_Q !== 'undefined') && XAPI_GEN_Q[sid];
   if (_xq) cfg.statements.forEach(function (s) {
     const given = state.answers[s.id];
-    xapiAnswered(_xq[0], s.xapiQ, given === s.correct, true,
-      s.text + ' → ' + (given || '—'), String(given === SAQ_LABELS[0]));
+    xapiAnswered(_xq[0], s.xapiQ, given === s.correct, true, { value: given === SAQ_LABELS[0] });
   });
 
   cfg.statements.forEach(stmt => {

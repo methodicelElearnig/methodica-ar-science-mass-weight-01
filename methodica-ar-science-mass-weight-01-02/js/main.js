@@ -1892,7 +1892,7 @@ function scq17Check() {
   scq17Attempts++;
   const isCorrect = SCQ17.options[scq17Selected] === SCQ17.correctAnswer;
   xapiAnswered('002', 'q1', isCorrect, isCorrect || scq17Attempts >= SCQ17.maxAttempts,
-    SCQ17.options[scq17Selected]);
+    xapiChoiceOf('002', 'q1', SCQ17.options[scq17Selected], isCorrect));
   const opts = Array.from(document.querySelectorAll('#s15-options .s11-option'));
 
   if (isCorrect) {
@@ -2089,7 +2089,7 @@ function scq18Check() {
   scq18Attempts++;
   const isCorrect = SCQ18.options[scq18Selected] === SCQ18.correctAnswer;
   xapiAnswered('001', 'q1', isCorrect, isCorrect || scq18Attempts >= SCQ18.maxAttempts,
-    SCQ18.options[scq18Selected]);
+    xapiChoiceOf('001', 'q1', SCQ18.options[scq18Selected], isCorrect));
   const opts = Array.from(document.querySelectorAll('#s16-options .s11-option'));
   if (isCorrect) {
     scq18Done = true; scq18Correct = true;
@@ -2299,7 +2299,7 @@ function scq19Check() {
   scq19Attempts++;
   const isCorrect = SCQ19.options[scq19Selected] === SCQ19.correctAnswer;
   xapiAnswered('003', 'q1', isCorrect, isCorrect || scq19Attempts >= SCQ19.maxAttempts,
-    SCQ19.options[scq19Selected]);
+    xapiChoiceOf('003', 'q1', SCQ19.options[scq19Selected], isCorrect));
   const opts = Array.from(document.querySelectorAll('#s18-options .s11-option'));
   if (isCorrect) {
     scq19Done = true; scq19Correct = true;
@@ -2516,6 +2516,15 @@ function enterScreen19() {
 }
 
 /* The grid as one comparable value: 'כבד=יומיומית | שוקל=… | …'. */
+/* The label of the option the learner picked in a row ('' when none): what xAPI reports. */
+function dq19Shown(id) {
+  const d = dq19GetDD(id), v = dq19GetVal(id);
+  if (!d || !v) return '';
+  const o = Array.prototype.find.call(d.querySelectorAll('.s17-dd-opt'), function (b) {
+    return (b.getAttribute('onclick') || '').indexOf(",'" + v + "')") !== -1;
+  });
+  return o ? o.textContent.replace(/\s+/g, ' ').trim() : v;
+}
 function dq19Sig() { return DQ19_ITEMS.map(function (it) { return it.label + '=' + (dq19GetVal(it.id) || '—'); }).join(' | '); }
 /* Retry gate (720 spec, QA D-14): the grid submitted in the last non-final wrong attempt. After
    that attempt the wrong slots are cleared, so re-picking the same wrong values would rebuild the
@@ -2527,6 +2536,7 @@ function dq19Check() {
   dq19Attempts++;
 
   const _dq19Submitted = dq19Sig();   // before any slot is cleared or overwritten
+  const _dq19Pairs = DQ19_ITEMS.map(function (it) { return { source: it.label, target: dq19Shown(it.id) || null }; });
   let allCorrect = true;
   DQ19_ITEMS.forEach(item => {
     const dd = dq19GetDD(item.id);
@@ -2542,7 +2552,8 @@ function dq19Check() {
   });
 
   /* xAPI: after the row loop, when allCorrect is final (guide §6.3 trap 1). */
-  xapiAnswered('004', 'q1', allCorrect, allCorrect || dq19Attempts >= 2, _dq19Submitted);
+  /* matching: word -> the option LABEL the learner picked (the value behind it is shorter) */
+  xapiAnswered('004', 'q1', allCorrect, allCorrect || dq19Attempts >= 2, { pairs: _dq19Pairs });
   if (!allCorrect && dq19Attempts < 2) dq19LastWrong = _dq19Submitted;   // Retry gate
 
   if (allCorrect) {
@@ -2820,9 +2831,10 @@ function dq20Check() {
   });
 
   /* xAPI: one check; reports the submitted values (snapshot), not the corrected ones. */
-  xapiAnswered('005', 'q1', allCorrect, true, DQ20_ITEMS.map(function (item) {
-    return (item.label || item.id) + '=' + (snapshot[item.id] || '—');
-  }).join(' | '));
+  /* matching: statement i (alef, bet, …) is the metadata's i-th source */
+  xapiAnswered('005', 'q1', allCorrect, true, { pairs: DQ20_ITEMS.map(function (item, i) {
+    return { source: i, target: snapshot[item.id] || null };
+  }) });
   dq20Answer = allCorrect ? null : snapshot;
   dq20View   = 'solution';
 
@@ -3373,7 +3385,8 @@ function scq23Check() {
   var isCorrect = scq23SelectedId === SCQ23.correctId;
   var opts = Array.from(document.querySelectorAll('#s23-options .s23-opt'));
   var selEl = opts.filter(function(el) { return el.dataset.id === scq23SelectedId; })[0];
-  xapiAnswered('007', 'q1', isCorrect, isCorrect || scq23Attempts >= SCQ23.maxAttempts, xapiAnswerText(selEl));
+  xapiAnswered('007', 'q1', isCorrect, isCorrect || scq23Attempts >= SCQ23.maxAttempts,
+    xapiChoiceOf('007', 'q1', xapiAnswerText(selEl), isCorrect));
 
   if (isCorrect) {
     scq23Done    = true;

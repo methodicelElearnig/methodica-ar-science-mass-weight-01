@@ -3763,7 +3763,7 @@ function scqGenCheck(sid) {
   /* xAPI: the engine is keyed by the LEGACY screen number; XAPI_GEN_Q (config block) names the item. */
   const _xq = (typeof XAPI_GEN_Q !== 'undefined') && XAPI_GEN_Q[sid];
   if (_xq) xapiAnswered(_xq[0], _xq[1], isCorrect, isCorrect || state.attempts >= cfg.maxAttempts,
-    cfg.options[state.selected]);
+    xapiChoiceOf(_xq[0], _xq[1], cfg.options[state.selected], isCorrect));
   const opts      = Array.from(document.querySelectorAll('#' + cfg.optionsContainerId + ' .s11-option'));
 
   if (isCorrect) {
@@ -4210,7 +4210,9 @@ function s26dndCheck() {
 
   const allCorrect = cfg.items.every(item => S26DND_TARGET_VALUE[s26dndPlacement[item.id]] === item.correct);
   /* xAPI: all-or-nothing board, reported once the verdict is final (before any branch overwrites it). */
-  xapiAnswered('002', 'q1', allCorrect, allCorrect || state.attempts >= cfg.maxAttempts, s26dndSig());
+  xapiAnswered('002', 'q1', allCorrect, allCorrect || state.attempts >= cfg.maxAttempts, { pairs: cfg.items.map(function (it) {
+    return { source: it.label, target: S26DND_TARGET_VALUE[s26dndPlacement[it.id]] || null };
+  }) });
   if (!allCorrect && state.attempts < cfg.maxAttempts) s26dndLastWrong = s26dndSig();   // Retry gate
 
   if (allCorrect) {
