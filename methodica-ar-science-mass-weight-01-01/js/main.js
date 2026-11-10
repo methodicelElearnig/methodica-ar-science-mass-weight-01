@@ -525,8 +525,12 @@ function hookCheck() {
   hookAnswered = true;
   /* xAPI: item 001 q1, one attempt only. The question asks which statement is NOT scientifically
      correct, so the right pick is character 2 (see hookRestoreFeedback). */
-  xapiAnswered('001', 'q1', hookSelected === 2, true,
-    xapiAnswerText(document.getElementById('hc' + hookSelected)));
+  const _hb = document.querySelector('#hc' + hookSelected + ' .s1-bub-body');
+  const _hn = _hb && _hb.querySelector('.s1-bub-name');
+  const _hName = _hn ? _hn.textContent.trim() : '';
+  /* the speaker's name sits in its own span; the catalogue writes "name: text" */
+  xapiAnswered('001', 'q1', hookSelected === 2, true, xapiChoiceOf('001', 'q1',
+    (_hName ? _hName + ': ' : '') + xapiAnswerText(_hb).slice(_hName.length).trim(), hookSelected === 2));
   hookRestoreFeedback();
   btn.textContent = 'متابعة';
   btn.classList.add('btn-advance');
@@ -1310,10 +1314,11 @@ function ddq12Check() {
 
   /* xAPI: item 005 q1 — one check, all cells or nothing; after the loop, when the verdict is final. */
   const _ddq12Ok = Object.keys(DDQ12.correct).every(function (k) { return DDQ12.correct[k] === ddq12State[k]; });
-  xapiAnswered('007', 'q1', _ddq12Ok, true, Object.keys(DDQ12.correct).map(function (k) {
+  /* matching: the card (source) placed in each cell; the cell is "row - column" (target) */
+  xapiAnswered('007', 'q1', _ddq12Ok, true, { pairs: Object.keys(DDQ12.correct).map(function (k) {
     const rc = /^r(\d+)-c(\d+)$/.exec(k);
-    return DDQ12.rows[+rc[1]] + ' / ' + DDQ12.cols[+rc[2]] + ': ' + (DDQ12.items[ddq12State[k]] || '—');
-  }).join(' | '));
+    return { source: DDQ12.items[ddq12State[k]] || null, target: DDQ12.rows[+rc[1]] + ' - ' + DDQ12.cols[+rc[2]] };
+  }).filter(function (p) { return p.source; }) });
 
   ddq12SetNav(2);
   try { flushResumeSave(); } catch (e) {}
@@ -1572,9 +1577,9 @@ function ddrop14Check() {
 
   ddrop14Correct = allCorrect;
   /* xAPI: item 006 q1 — one check; reports what the learner submitted, not the corrected values. */
-  xapiAnswered('008', 'q1', allCorrect, true, DDROP14.items.map(function (it, i) {
-    return it.text + ' → ' + (submitted[i] || '—');
-  }).join(' | '));
+  xapiAnswered('008', 'q1', allCorrect, true, { pairs: DDROP14.items.map(function (it, i) {
+    return { source: it.text, target: submitted[i] || null };
+  }) });
   ddrop14Answer  = allCorrect ? null : submitted;
   markQuestionResult(1, allCorrect);
   ddrop14ShowFeedback(allCorrect);
@@ -1785,7 +1790,7 @@ function scq15Check() {
   scq15Attempts++;
   const isCorrect = SCQ15.options[scq15Selected] === SCQ15.correctAnswer;
   xapiAnswered('009', 'q1', isCorrect, isCorrect || scq15Attempts >= SCQ15.maxAttempts,
-    SCQ15.options[scq15Selected]);
+    xapiChoiceOf('009', 'q1', SCQ15.options[scq15Selected], isCorrect));
   const opts = Array.from(document.querySelectorAll('#s13-options .s13-option'));
 
   if (isCorrect) {
