@@ -10,12 +10,8 @@
   "masteryLevel": null,
   "order": 6,
   "depthLevel": "core-curriculum-basic",
-  "cognitiveLevels": [
-    "analyzing"
-  ],
-  "languages": [
-    "Arabic"
-  ],
+  "cognitiveLevels": ["analyzing"],
+  "languages": ["Arabic"],
   "skills": [],
   "estimatedTimeInMinutes": 9,
   "createdAt": "2026-11-04T00:00:00.000Z",
@@ -39,6 +35,9 @@
             "ينقص ملصق إضافي يعرض الكتلة."
           ],
           "correctAnswers": [
+            "تظهر على الملصقات الـ 3 عبارة \"الوزن الصافي\"، لكن الغرام والكيلوغرام وحدتان تصفان الكتلة."
+          ],
+          "correctXapiResponsesPattern": [
             "تظهر على الملصقات الـ 3 عبارة \"الوزن الصافي\"، لكن الغرام والكيلوغرام وحدتان تصفان الكتلة."
           ]
         },
@@ -70,17 +69,12 @@
           ],
           "correctAnswers": [
             "لأنه تمّت معايرة الموازين بحيث تعرض الوزن بوحدات قياس الكتلة."
+          ],
+          "correctXapiResponsesPattern": [
+            "لأنه تمّت معايرة الموازين بحيث تعرض الوزن بوحدات قياس الكتلة."
           ]
         }
       ]
-    },
-    {
-      "id": "https://lomdot.education.gov.il/metodica/720/ar/science/mass-weight/01/methodica-ar-science-mass-weight-01-06/methodica-ar-science-mass-weight-01-06-002/",
-      "title": "نهاية الوحدة",
-      "informationToBot": "מטרת הפריט: מסך סיום היחידה עם השלמת שאלת השיא בהצלחה. מה התלמיד אמור להבין/לתרגל: אין תוכן לימודי נוסף - זהו מסך משוב מסכם בלבד. כיווני חשיבה ואסטרטגיות: אין. טעויות נפוצות: אין. מידע נוסף: תוכן המסך: 'כל הכבוד! השלמת את היחידה בהצלחה!'. אין שאלה מוערכת. צילום מסך: לא צורף.",
-      "contentType": "summary",
-      "mediaFormat": "text",
-      "questions": []
     }
   ]
 }
