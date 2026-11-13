@@ -764,7 +764,9 @@ if (!JSDOM) {
       if (evalItems.length) {
         const E = evalItems[0];
         const sE = OWN[c].find((n) => map[n] && map[n][0] === E);
-        const sO = OWN[c].find((n) => !map[n] || map[n][0] !== E);
+        /* the other screen comes AFTER E: leaving E closes it only on a forward move (B-2, monday 13454123722 —
+           a move to an earlier screen is a Back and never closes); the first screen outside E was screen 0 */
+        const sO = OWN[c].find((n) => n > sE && (!map[n] || map[n][0] !== E));
         const b1 = JSON.parse(run('(function(){ var E = ' + JSON.stringify(E) + ';' +
           ' var nE = function () { return window.__log.filter(function (s) { return s.v === "completed" && s.id === xapiItemId(E); }).length; };' +
           ' var keep = _unitState; window.xapiItemAnswered = {}; _unitState = emptyUnitState(); xapiCurrentItem = null; window.__log = [];' +
