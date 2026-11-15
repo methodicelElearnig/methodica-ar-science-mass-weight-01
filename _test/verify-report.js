@@ -825,8 +825,8 @@ if (!JSDOM) {
            body-matter-01 75559c9). Screen 24 promises 3 questions, all of them right. success and
            score.scaled come from one count of the three basic questions (questionResults); Standard B
            (004) never enters; success <=> scaled >= 3/3. The stop after Q3 and the last click report
-           the same result. A learner who skipped the basic set (passed part 02) keeps the old result:
-           success:true, scaled over what was asked (Vadim 09.11). */
+           the same result. A learner who skipped the basic set (passed part 02) gets 004's own result
+           (2026-11-15; until then success:true, scaled over what was asked). */
         let sc = {};
         try { sc = JSON.parse(run('(function(){ var orig = xapiEndComponent, keepQ = JSON.stringify(XAPI_Q_RESULTS),' +
           ' keepR = JSON.stringify(window.lomdaState.questionResults), keepS = basicStopEnded, keepScr = currentScreen, out = { res: [], stop: [], end: [], skip: [] };' +
@@ -838,7 +838,7 @@ if (!JSDOM) {
           ' [0, 1, 2, 3].forEach(function (k) { [false, true].forEach(function (c) { set(k, c); var r = typeof xapiPartResult === "function" ? xapiPartResult() : { missing: true }; r.k = k; r.c = c; out.res.push(r); }); });' +
           ' out.cur = out.stop; [2, 3].forEach(function (k) { set(k, null); basicStopEnded = false; basicContinue(); });' +
           ' out.cur = out.end; set(3, false); goToNextComponent();' +
-          ' out.cur = out.skip; [true, false].forEach(function (c) { set(0, c, true); goToNextComponent(); });' +
+          ' out.cur = out.skip; [true, false, null].forEach(function (c) { set(0, c, true); goToNextComponent(); });' +
           ' xapiEndComponent = orig; Object.keys(XAPI_Q_RESULTS).forEach(function (q) { delete XAPI_Q_RESULTS[q]; }); Object.assign(XAPI_Q_RESULTS, JSON.parse(keepQ));' +
           ' window.lomdaState.questionResults = JSON.parse(keepR); basicStopEnded = keepS; if (currentScreen !== keepScr) goTo(keepScr); delete out.cur;' +
           ' return JSON.stringify(out); })()')); } catch (e) { sc = {}; }
@@ -854,8 +854,13 @@ if (!JSDOM) {
            sc.stop.length === 1 && sc.stop[0].success === false && Math.abs(sc.stop[0].score.scaled - 2 / 3) < 1e-9, JSON.stringify(sc.stop));
         ok(c, 'score contract: the last click at 3/3 + Standard B wrong sends success:true, scaled 1 (004 not counted)',
            sc.end.length === 1 && sc.end[0].success === true && sc.end[0].score.scaled === 1, JSON.stringify(sc.end));
-        ok(c, 'skip path (passed part 02, only 004 asked) keeps success:true, scaled = 004 (1, then 0)',
-           sc.skip.length === 2 && sc.skip.every(function (r) { return r.success === true; }) && sc.skip[0].score.scaled === 1 && sc.skip[1].score.scaled === 0,
+        /* 2026-11-15 (MOE monday, runbook 5c): the skip path's result is 004's own — right: success
+           true, scaled 1; wrong or unanswered: success false, scaled 0 (was success:true, scaled 0). */
+        ok(c, 'skip path (passed part 02, only 004 asked): success and scaled follow 004 (right, wrong, unanswered)',
+           sc.skip.length === 3 &&
+           sc.skip[0].success === true && sc.skip[0].score.scaled === 1 &&
+           sc.skip[1].success === false && sc.skip[1].score.scaled === 0 &&
+           sc.skip[2].success === false && sc.skip[2].score.scaled === 0,
            JSON.stringify(sc.skip));
       }
     }
