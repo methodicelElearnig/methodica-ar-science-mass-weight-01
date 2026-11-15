@@ -43,7 +43,7 @@
         {
           "questionId": "https://lomdot.education.gov.il/metodica/720/ar/science/mass-weight/01/methodica-ar-science-mass-weight-01-06/methodica-ar-science-mass-weight-01-06-001/q2",
           "questionType": "true-false",
-          "questionText": "تخيّلوا أنه تم أخذ العبوات الثلاث وإرسالها إلى محطة فضاء في الفضاء البعيد، حيث قوة الجاذبية هناك هي صفر (معلومة لغرض السؤال). ب. اختاروا لكل ادّعاء: صحيح أم غير صحيح. في محطة الفضاء، ستكون كتلة لوح الشوكولاتة أقل من 45 غرام.",
+          "questionText": "تخيّلوا أنه تم أخذ العبوات الثلاث وإرسالها إلى محطة فضاء في الفضاء البعيد، حيث قوة الجاذبية هناك هي صفر (معلومة لغرض السؤال). ب. اختاروا لكل ادّعاء: صحيح أم غير صحيح. في محطة الفضاء، ستكون كتلة لوح الشوكولاتة أقل من 45 غرامًا.",
           "answers": ["true", "false"],
           "correctAnswers": ["false"],
           "xapiInteractionComponents": null,

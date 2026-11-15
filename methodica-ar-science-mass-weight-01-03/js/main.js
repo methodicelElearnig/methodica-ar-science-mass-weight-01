@@ -3271,7 +3271,7 @@ window.GEN_DATA = {
     suptitle:        'أنهيت التمرين بنجاح - كل الاحترام!',
     bigtitle:        'مهمّة صفيّة',
     subtitle:        'هذا وقت مناسب للتعلم بطريقة مختلفة أيضًا، لأن التعلم يتم بعدّة طرق.',
-    bubble:          'هذا فرصة جيدة لتمديد العضلات!',
+    bubble:          'هذه فرصة جيدة لتمديد العضلات!',
     char:            '../unit-assets/video/moving-opt.mp4',
     continueBtnText: 'يمكن البدء!'
   },
@@ -3428,10 +3428,10 @@ window.GEN_DATA = {
     ],
     correctAnswer: 'قياس عدّة حبات معًا، وقسمة الكتلة الإجمالية على عدد الحبات نفسه‎.',
     maxAttempts: 2, hintAlwaysEnabled: false,
-    hint: { title: 'تلميح', body: 'كتلة الحبة الواحدة صغيرة جدًا ولذلك لن يُظهرها الميزان.\nماذا يجب أن نفعل لكي تظهر على الميزان قيمة مختلف عن الصفر،\nوكيف يمكننا الوصول من هذه القيمة، ومعرفة عدد الحبات،\nإلى كتلة حبة واحدة؟' },
-    feedbackCorrect:        { title: 'ممتاز‎!',           body: 'قياس كتلة عدد عدّة حبات الأرزّ معًا سيُظهر الكتلة الإجمالية على شاشة الميزان.\nنقسم الكتلة الإجمالية التي حصلنا عليها على عدد الحبات التي قسنا وزنها،\nفنصل إلى معدل كتلة حبة أرزّ واحدة‎.' },
+    hint: { title: 'تلميح', body: 'كتلة الحبة الواحدة صغيرة جدًا ولذلك لن يُظهرها الميزان.\nماذا يجب أن نفعل لكي تظهر على الميزان قيمة مختلفة عن الصفر،\nوكيف يمكننا الوصول من هذه القيمة، ومعرفة عدد الحبات،\nإلى كتلة حبة واحدة؟' },
+    feedbackCorrect:        { title: 'ممتاز‎!',           body: 'قياس كتلة عدّة حبات الأرزّ معًا سيُظهر الكتلة الإجمالية على شاشة الميزان.\nنقسم الكتلة الإجمالية التي حصلنا عليها على عدد الحبات التي قسنا كتلتها،\nفنصل إلى معدل كتلة حبة أرزّ واحدة‎.' },
     feedbackIncorrectFirst: { title: 'الإجابة غير صحيحة.', body: 'هل نحاول مرة أخرى؟' },
-    feedbackIncorrectFinal: { title: 'الإجابة غير صحيحة.', body: 'قياس كتلة عدد عدّة حبات الأرزّ معًا سيُظهر الكتلة الإجمالية على شاشة الميزان.\nنقسم الكتلة الإجمالية التي حصلنا عليها على عدد الحبات التي قسنا وزنها،\nفنصل إلى معدل كتلة حبة أرزّ واحدة‎.' }
+    feedbackIncorrectFinal: { title: 'الإجابة غير صحيحة.', body: 'قياس كتلة عدّة حبات الأرزّ معًا سيُظهر الكتلة الإجمالية على شاشة الميزان.\nنقسم الكتلة الإجمالية التي حصلنا عليها على عدد الحبات التي قسنا كتلتها،\nفنصل إلى معدل كتلة حبة أرزّ واحدة‎.' }
   },
 
   37: {
@@ -3495,10 +3495,10 @@ window.GEN_DATA = {
     ],
     correctZones: { green: ['g1','g2','g3','g4'], orange: ['o1','o2','o3'] },
     maxAttempts: 2, hintAlwaysEnabled: false,
-    hint: { title: 'تلميح', body: 'ابحثوا عن النقاط التي تكون فيها قراءة الوزن أعلى من المعتاد، وعن النقاط التي تكون فيها أقل من المعتاد‎.' },
-    feedbackCorrect:        { title: 'ممتاز‎!',           body: 'عندما يتسارع قطار الملاهي، تتغير القوة التي تعمل على الجسم، ولذلك يشعر الجسم أحيانًا بأنه "أثقل" وأحيانًا بأنه "أخف". يقيس الوزن هذه القوة، ولذلك تتغير قراءة الوزن أيضًا أثناء الطريق.' },
+    hint: { title: 'تلميح', body: 'ابحثوا عن النقاط التي تكون فيها قراءة الميزان أعلى من المعتاد، وعن النقاط التي تكون فيها أقل من المعتاد‎.' },
+    feedbackCorrect:        { title: 'ممتاز‎!',           body: 'عندما يتسارع قطار الملاهي، تتغير القوة التي تعمل على الجسم، ولذلك يشعر الجسم أحيانًا بأنه "أثقل" وأحيانًا بأنه "أخف". يقيس الميزان هذه القوة، ولذلك تتغير قراءة الميزان أيضًا أثناء الطريق.' },
     feedbackIncorrectFirst: { title: 'الإجابة غير صحيحة.', body: 'هل نحاول مرة أخرى؟' },
-    feedbackIncorrectFinal: { title: 'الإجابة غير صحيحة.',  body: 'عندما يتسارع قطار الملاهي، تتغير القوة التي تعمل على الجسم، ولذلك يشعر الجسم أحيانًا بأنه "أثقل" وأحيانًا بأنه "أخف". يقيس الوزن هذه القوة، ولذلك تتغير قراءة الوزن أيضًا أثناء الطريق.' }
+    feedbackIncorrectFinal: { title: 'الإجابة غير صحيحة.',  body: 'عندما يتسارع قطار الملاهي، تتغير القوة التي تعمل على الجسم، ولذلك يشعر الجسم أحيانًا بأنه "أثقل" وأحيانًا بأنه "أخف". يقيس الميزان هذه القوة، ولذلك تتغير قراءة الميزان أيضًا أثناء الطريق.' }
   },
 
   /* ── Screen 39: TransitionScreen — שאלת השיא ────────────────────── */
@@ -3549,7 +3549,7 @@ window.GEN_DATA = {
     hintTitleId: 's39-hint-title', hintBodyId: 's39-hint-body',
     feedbackId: 's39-feedback', fbTitleId: 's39-fb-title', fbBodyId: 's39-fb-body',
     statements: [
-      { id: 'stmt1', text: 'في محطة الفضاء، ستكون كتلة لوح الشوكولاتة أقل من 45 غرام.', correct: 'غير صحيح' },
+      { id: 'stmt1', text: 'في محطة الفضاء، ستكون كتلة لوح الشوكولاتة أقل من 45 غرامًا.', correct: 'غير صحيح' },
       { id: 'stmt2', text: 'في محطة الفضاء، سينخفض وزن المنتجات.', correct: 'صحيح' }
     ],
     maxAttempts: 1, hintAlwaysEnabled: true,
@@ -4891,9 +4891,10 @@ function endAtBasicStop() {
    restored on resume). Standard B (item 004) sends its own answered and never enters the
    result (until now the last click sent success:true with scaled over all the questions
    asked, 004 included).
-   A learner who passed part 02 skips the basic set and answers only 004: no basic question is
-   resolved, and the result stays as before — success:true, scaled over what was asked
-   (docs/REPORT-XAPI.md §4; Vadim 09.11: keep). */
+   A learner who passed part 02 skips the basic set and answers only 004 (Standard B): no basic
+   question is resolved, so the result is 004's own — success and scaled 1 when it is right, 0
+   when it is wrong or unanswered (2026-11-15, MOE monday: success:true with scaled 0 was
+   inconsistent, runbook 5c; XAPI_Q_RESULTS is restored on resume). */
 const XAPI_PASS_K = 3, XAPI_PASS_N = 3;
 function basicCorrectCount() {
   const qr = window.lomdaState.questionResults || {};
@@ -4902,8 +4903,8 @@ function basicCorrectCount() {
 function xapiPartResult() {
   const qr = window.lomdaState.questionResults || {};
   if (![1, 2, 3].some(function (q) { return typeof qr[q] === 'boolean'; })) {
-    const asked = Object.keys(XAPI_Q_RESULTS).length;
-    return asked ? { success: true, score: { scaled: xapiCorrectCount() / asked } } : { success: true };
+    const ok004 = XAPI_Q_RESULTS['004/q1'] === true;
+    return { success: ok004, score: { scaled: ok004 ? 1 : 0 } };
   }
   const ok = basicCorrectCount();
   return { success: ok >= XAPI_PASS_K, score: { scaled: ok / XAPI_PASS_N } };
@@ -5649,7 +5650,7 @@ resetScreenState(currentScreen);
 function goToPrevComponent() { if (!DEV_NAV) return; window.location.href = '../methodica-ar-science-mass-weight-01-02/index.html' + window.location.search + '#screen=23'; }
 /* The part's LAST click (screen 29, #s26-continue-btn): reports the component and stops
    (ADDING-REPORTING-AND-RESUME.md §6.5, §8.12). The result is xapiPartResult — the basic set
-   only; a learner who passed part 02 skips it and keeps the old result (docs/REPORT-XAPI.md §4). */
+   only; a learner who passed part 02 skips it and gets 004's own result (docs/REPORT-XAPI.md §4). */
 function goToNextComponent() {
   xapiEndComponent(xapiPartResult(), document.getElementById('s26-continue-btn'));
   if (DEV_NAV) window.location.href = '../methodica-ar-science-mass-weight-01-04/index.html' + window.location.search;
