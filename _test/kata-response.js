@@ -2,7 +2,7 @@
    (MOE runbook checks, 10.11.26: QA/2026-11-10_moe-runbook-checks/REPORT.md, classes A–D, F, G).
 
    For every question Kata holds (KATA below, read with retrieve-metadata.ps1 -OutDir <scratch> on
-   10.11.26, read only), the test boots the part that reports it in jsdom, answers it CORRECTLY
+   10.11.26, read only; 05/003/q1 re-read 15.11.26 after its PATCH), the test boots the part that reports it in jsdom, answers it CORRECTLY
    through the page's own controller (the SCQ engine for every SCQ_QID screen, the part's check
    function for the others, DRIVERS below) and reads result.response the way the library builds it
    (720-common-lib/xapi-720-l.js:616-620: res.response, else student_answer joined by ' | ').
@@ -46,7 +46,7 @@ const KATA = {
   "05/001/q1": ["على الرغم من أن الكتلة متساوية، فإن زمن سقوط الجسمين مختلف."],   // choice
   "05/001/q2": ["مقاومة الهواء كانت مختلفة بين الأجسام، ولذلك حصلنا على أزمنة سقوط مختلفة، على الرغم من أن الكتلة كانت متساوية."],   // choice
   "05/002/q1": ["قياس عدّة حبات معًا، وقسمة الكتلة الإجمالية على عدد الحبات نفسه."],   // choice
-  "05/003/q1": [],   // other
+  "05/003/q1": ["نقطة تكون فيها قراءة الميزان أعلى من المعتاد[,]نقطة تكون فيها قراءة الميزان أقل من المعتاد"],   // choice (Kata PATCH 15.11)
   "06/001/q1": ["تظهر على الملصقات الـ 3 عبارة \"الوزن الصافي\"، لكن الغرام والكيلوغرام وحدتان تصفان الكتلة."],   // choice
   "06/001/q2": ["false"],   // true-false
   "06/001/q3": ["true"],   // true-false
@@ -54,8 +54,9 @@ const KATA = {
 };
 
 /* Proposed Kata entries, written into repo metadata/ for Vadim's OK (not in Kata yet). The page and
-   this test follow metadata/; KATA above stays the read of Kata. */
-const PROPOSED = { "05/003/q1": ["نقطة تكون فيها قراءة الوزن أعلى من المعتاد[,]نقطة تكون فيها قراءة الوزن أقل من المعتاد"] };
+   this test follow metadata/; KATA above stays the read of Kata. Empty since 15.11: 05/003/q1 was
+   PATCHed into Kata (choice, "قراءة الميزان"; QA/2026-11-15_ar-mass-weight-01-moe). */
+const PROPOSED = {};
 const EXPECT = Object.assign({}, KATA, PROPOSED);
 
 /* Non-SCQ questions: the screen and the code that puts the right answer in and checks it. */
