@@ -755,6 +755,28 @@ if (!JSDOM) {
            one(sel.back, paths.video.mediaFormat), JSON.stringify(sel.back));
         ok(c, 'choice: a click on the already-active tab sends nothing (no switch, no choice)', sel.activeTab === 4, JSON.stringify(sel));
         ok(c, 'choice: nothing is sent while a restore paints', sel.restoring === 0, JSON.stringify(sel));
+
+        /* ── monday 13451740972 (2026-11-17): a switch on the path toggle sends no item 'completed', in either
+           direction; the path item closes on the forward move out of it. Driven by the page's own handlers. ── */
+        const swc = JSON.parse(run('(function(){ var keepS = window.sendStatement720, keepU = _unitState, done = [], out = {};' +
+          ' window.sendStatement720 = function (v, t, r, o) { if (v === "completed" && o && o.objectId) done.push(String(o.objectId).replace(/\\/$/, "").slice(-3)); };' +
+          ' var card = function (v) { return document.querySelector("#s3 .s3-card[data-value=\\"" + v + "\\"]"); };' +
+          ' _unitState = emptyUnitState(); xapiCurrentItem = null;' +
+          ' goTo(3); tosSelect(card("video")); tosAdvance(); done.length = 0;' +
+          ' s4SwitchMode("text"); out.toText = done.slice(); out.onText = currentScreen;' +
+          ' s5SwitchMode("video"); out.back = done.slice(); out.onVideo = currentScreen;' +
+          ' s4SwitchMode("text"); out.again = done.slice();' +
+          ' goTo(6); out.exit = done.slice();' +
+          ' out.hubs = typeof XAPI_HUB_SCREENS === "undefined" ? null : XAPI_HUB_SCREENS;' +
+          ' window.sendStatement720 = keepS; _unitState = keepU; xapiCurrentItem = null; goTo(' + OWN[c][OWN[c].length - 1] + '); return JSON.stringify(out); })()'));
+        ok(c, 'switch: the s4 toggle to text (4 -> 5) lands on the text screen and sends no completed',
+           swc.onText === 5 && swc.toText.length === 0, JSON.stringify(swc));
+        ok(c, 'switch: the s5 toggle back to the video (5 -> 4) lands on the video screen and sends no completed',
+           swc.onVideo === 4 && swc.back.length === 0, JSON.stringify(swc));
+        ok(c, 'switch: video -> text -> video -> text = no completed for either path item', swc.again.length === 0, JSON.stringify(swc));
+        ok(c, 'switch: the forward move out of the text screen (5 -> 6) closes its item ' + paths.text.item + ' once, and only it',
+           JSON.stringify(swc.exit) === JSON.stringify([paths.text.item]), JSON.stringify(swc));
+        ok(c, 'switch: screen 4 is not a B-2 hub any more', swc.hubs === null, JSON.stringify(swc.hubs));
       }
 
       /* ── B-1 (live 2026-09-24): leaving an UNANSWERED eval item must neither send its 'completed'

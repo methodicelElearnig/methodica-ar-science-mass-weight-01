@@ -98,19 +98,30 @@ const val = (w, expr) => w.eval('(function(){ try { return JSON.stringify(' + ex
       ok(rh.itemDone(F).length === 1, tag0 + ' hub ' + h + ': the move ' + from + ' -> ' + h + ' still closes item ' + F, String(rh.itemDone(F).length));
     }
 
-    /* path switches: a part with XAPI_LEARNING_PATHS whose paths are separate items — switching from the later
-       path into the earlier one (a lower screen) is a choice, not a Back, so it must still close the item it
-       leaves; that needs the earlier path's first screen in XAPI_HUB_SCREENS */
+    /* path switches (monday 13451740972, 2026-11-17): a part with XAPI_LEARNING_PATHS whose paths are separate
+       items — a switch on the path toggle (the handler calls xapiPathSwitch() right before its goTo) closes
+       nothing, in either direction; the path item closes on the forward move out of it, and a mark is spent by
+       the very next xapiOnScreen */
     const paths = JSON.parse(val(w, 'typeof XAPI_LEARNING_PATHS !== "undefined" ? XAPI_LEARNING_PATHS : null'));
     if (paths) {
       const firsts = [...new Set(Object.values(paths).map((p) => p.item))]
         .map((item) => ({ item, n: screens.find((m) => itemOf(m) === item) })).filter((x) => x.n != null).sort((a, b) => a.n - b.n);
-      for (let i = 1; i < firsts.length; i++) {
+      ok(typeof w.xapiPathSwitch === 'function', tag0 + ' path switch: 20-xapi.js has xapiPathSwitch');
+      ok(Object.keys(hubs).length === 0, tag0 + ' path switch: the path starts are not B-2 hubs', JSON.stringify(hubs));
+      for (let i = 1; i < firsts.length && typeof w.xapiPathSwitch === 'function'; i++) {
         const lo = firsts[0], hi = firsts[i];
         const rp = load(part); await start(rp);
-        rp.w.xapiItemAnswered[rp.w.xapiItemId(hi.item)] = true;
-        rp.w.eval('goTo(' + hi.n + ')'); rp.w.eval('goTo(' + lo.n + ')');
-        ok(rp.itemDone(hi.item).length === 1, tag0 + ' path switch ' + hi.n + ' -> ' + lo.n + ' closes the path item ' + hi.item + ' (hub)', String(rp.itemDone(hi.item).length));
+        const sw = (n) => rp.w.eval('xapiPathSwitch(); goTo(' + n + ')');
+        const both = () => lo.item + ':' + rp.itemDone(lo.item).length + ' ' + hi.item + ':' + rp.itemDone(hi.item).length;
+        rp.w.xapiItemAnswered[rp.w.xapiItemId(hi.item)] = true; rp.w.xapiItemAnswered[rp.w.xapiItemId(lo.item)] = true;
+        rp.w.eval('goTo(' + lo.n + ')');
+        sw(hi.n);
+        ok(rp.itemDone(lo.item).length === 0, tag0 + ' path switch ' + lo.n + ' -> ' + hi.n + ' (a higher screen) sends no completed for ' + lo.item, both());
+        sw(lo.n);
+        ok(rp.itemDone(hi.item).length === 0, tag0 + ' path switch ' + hi.n + ' -> ' + lo.n + ' sends no completed for ' + hi.item, both());
+        const out = screens.find((m) => m > lo.n && itemOf(m) !== lo.item);
+        rp.w.eval('goTo(' + out + ')');
+        ok(rp.itemDone(lo.item).length === 1, tag0 + ' path switch: the forward move ' + lo.n + ' -> ' + out + ' closes ' + lo.item + ' once (the mark is spent)', both());
       }
     }
 
