@@ -780,6 +780,7 @@ function s5SwitchMode(mode) {
   if (mode === 'video') {
     window.lomdaState.acquisitionPath = 'video';
     xapiSelectedLearningType('video');   // switching path from the toggle is a choice too
+    xapiPathSwitch();                    // ...but not a forward move: no 'completed' for the item left (monday 13451740972)
     goTo(SCREEN_VIDEO);
   }
 }
@@ -799,6 +800,7 @@ function s4SwitchMode(mode) {
   if (mode === 'text') {
     window.lomdaState.acquisitionPath = 'text';
     xapiSelectedLearningType('text');    // switching path from the toggle is a choice too
+    xapiPathSwitch();                    // ...but not a forward move: no 'completed' for the item left (monday 13451740972)
     goTo(SCREEN_ACCORDION);
   }
   // mode === 'video': already here, no-op
@@ -5454,10 +5456,8 @@ var XAPI_EVAL_ITEMS = { '001': 1, '007': 1, '008': 1, '009': 1 };
 /* The s3 learning-path choice ('selected', learning-type — unit-js/20-xapi.js xapiSelectedLearningType):
    lomdaState.acquisitionPath -> the path's item and its catalogue mediaFormat (the statement's response). */
 var XAPI_LEARNING_PATHS = { video: { item: '003', mediaFormat: 'video' }, text: { item: '004', mediaFormat: 'text' } };
-/* B-2 hub (monday 13454123722, 2026-11-13): the text screen's toggle to the video (s5SwitchMode, 5 -> 4) is a path
-   switch, not a Back, so it still closes the text item 004 (unit-js/20-xapi.js _xapiIsBackward). No Back button leads
-   to screen 4 (both paths go back to the choice, screen 3). */
-var XAPI_HUB_SCREENS = { 4: 1 };
+/* No B-2 hub here (monday 13451740972, 2026-11-17): a switch on the path toggle (s4SwitchMode / s5SwitchMode) is
+   marked with xapiPathSwitch() and closes nothing; the path item closes on the forward move out of it. */
 var XAPI_METADATA_FILE = '../metadata/methodica-ar-science-mass-weight-01-01.json';
 /* The part's last button (D-8: restoreEndedButton keeps it disabled once the ledger says done). */
 var XAPI_END_BTN = 's13-continue-btn';
